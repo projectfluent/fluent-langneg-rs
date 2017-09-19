@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fmt::{self, Display};
 use std::error::Error as ErrorTrait;
 use super::Locale;
+use super::options;
 
 fn is_alphabetic(s: &str) -> bool {
     s.chars()
@@ -53,16 +54,16 @@ impl Display for Error {
     }
 }
 
-fn ext_name_for_key(key: &str) -> &'static str {
+pub fn ext_name_for_key(key: &str) -> &'static str {
     match key {
         "u" => "unicode",
         _ => unimplemented!(),
     }
 }
 
-fn option_name_for_key(key: &str) -> &'static str {
+pub fn ext_key_for_name(key: &str) -> &'static str {
     match key {
-        "hc" => "hour-cycle",
+        "unicode" => "u",
         _ => unimplemented!(),
     }
 }
@@ -104,7 +105,7 @@ pub fn parse_language_tag(t: &str) -> Result<Locale, Error> {
                             }
                         }
                         None => {
-                            ext_key = Some(option_name_for_key(subtag));
+                            ext_key = Some(options::option_name_for_key(subtag));
                         }
                     }
                 }

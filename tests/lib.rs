@@ -18,12 +18,19 @@ struct TestInputData {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct TestOutput {
+struct TestOutputObject {
     language: Option<String>,
     script: Option<String>,
     region: Option<String>,
     variants: Option<Vec<String>>,
     extensions: Option<HashMap<String, HashMap<String, String>>>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(untagged)]
+enum TestOutput {
+    String(String),
+    Object(TestOutputObject)
 }
 
 #[derive(Serialize, Deserialize)]
@@ -47,11 +54,18 @@ fn parse() {
 
         let loc = Locale::new(&s, None).unwrap();
 
-        assert_eq!(loc.language, test.output.language);
-        assert_eq!(loc.script, test.output.script);
-        assert_eq!(loc.region, test.output.region);
-        assert_eq!(loc.variants, test.output.variants);
-        assert_eq!(loc.extensions, test.output.extensions);
+        match test.output {
+            TestOutput::Object(o) => {
+                assert_eq!(loc.language, o.language);
+                assert_eq!(loc.script, o.script);
+                assert_eq!(loc.region, o.region);
+                assert_eq!(loc.variants, o.variants);
+                assert_eq!(loc.extensions, o.extensions);
+            },
+            TestOutput::String(s) => {
+                assert_eq!(loc.to_string(), s);
+            }
+        }
     }
 }
 
@@ -64,13 +78,44 @@ fn parse_ext() {
 
         let loc = Locale::new(&s, None).unwrap();
 
-        assert_eq!(loc.language, test.output.language);
-        assert_eq!(loc.script, test.output.script);
-        assert_eq!(loc.region, test.output.region);
-        assert_eq!(loc.variants, test.output.variants);
-        assert_eq!(loc.extensions, test.output.extensions);
+        match test.output {
+            TestOutput::Object(o) => {
+                assert_eq!(loc.language, o.language);
+                assert_eq!(loc.script, o.script);
+                assert_eq!(loc.region, o.region);
+                assert_eq!(loc.variants, o.variants);
+                assert_eq!(loc.extensions, o.extensions);
+            },
+            TestOutput::String(s) => {
+                assert_eq!(loc.to_string(), s);
+            }
+        }
     }
 }
+
+// #[test]
+// fn serialize() {
+//     let tests = read_testsets("./tests/fixtures/locale/serialize-options.json").unwrap();
+
+//     for test in tests {
+//         let s = test.input.string;
+
+//         let loc = Locale::new(&s, None).unwrap();
+
+//         match test.output {
+//             TestOutput::Object(o) => {
+//                 assert_eq!(loc.language, o.language);
+//                 assert_eq!(loc.script, o.script);
+//                 assert_eq!(loc.region, o.region);
+//                 assert_eq!(loc.variants, o.variants);
+//                 assert_eq!(loc.extensions, o.extensions);
+//             },
+//             TestOutput::String(s) => {
+//                 assert_eq!(loc.to_string(), s);
+//             }
+//         }
+//     }
+// }
 
 // #[test]
 // fn options() {

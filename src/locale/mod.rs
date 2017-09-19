@@ -1,3 +1,4 @@
+use std::fmt;
 use std::collections::HashMap;
 
 mod parser;
@@ -22,5 +23,31 @@ impl Locale {
             options::apply_options(&mut locale, opts);
         }
         Ok(locale)
+    }
+}
+
+impl fmt::Display for Locale {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut subtags = vec![];
+
+        if let Some(ref language) = self.language {
+            subtags.push(language.clone());
+        } else {
+            subtags.push("und".to_owned());
+        }
+
+        if let Some(ref extensions) = self.extensions {
+            for (name, ext) in extensions {
+                let mut ext_keys = vec![options::option_key_for_name(name).to_owned()];
+
+                for (key, value) in ext {
+                    ext_keys.push(format!("{}-{}", key, value));
+                }
+
+                subtags.push(ext_keys.join("-"));
+            }
+        }
+
+        write!(f, "{}", subtags.join("-"))
     }
 }

@@ -1,0 +1,11 @@
+[
+  {
+    "input": {
+      "string": "en",
+      "options": {
+        "hour-cycle": "h12"
+      }
+    },
+    "output": "en-u-hc-h12"
+  }
+]
