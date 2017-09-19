@@ -1,0 +1,40 @@
+[
+  {
+    "input": {
+      "string": "en"
+    },
+    "output": {
+      "language": "en"
+    }
+  },
+  {
+    "input": {
+      "string": "en-Latn"
+    },
+    "output": { 
+      "language": "en",
+      "script": "Latn"
+    }
+  },
+  {
+    "input": {
+      "string": "en-Latn-US"
+    },
+    "output": { 
+      "language": "en",
+      "script": "Latn",
+      "region": "US"
+    }
+  },
+  {
+    "input": {
+      "string": "en-Latn-US-windows"
+    },
+    "output": { 
+      "language": "en",
+      "script": "Latn",
+      "region": "US",
+      "variants": ["windows"]
+    }
+  }
+]

@@ -1,0 +1,12 @@
+[package]
+name = "fluent_locale"
+version = "0.1.0"
+authors = ["Zibi Braniecki <gandalf@mozilla.com>"]
+
+[dependencies]
+regex = "0.2"
+
+[dev-dependencies]
+serde = "1.0"
+serde_json = "1.0"
+serde_derive = "1.0"
