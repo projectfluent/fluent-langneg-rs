@@ -42,16 +42,26 @@ impl Locale {
         return "";
     }
 
-    pub fn set_script(&mut self, value: Option<String>) {
-        self.script = value;
+    pub fn set_script(&mut self, value: &str) -> parser::Result<()> {
+        if !value.is_empty() {
+            self.script = Some(parser::parse_script_subtag(value)?);
+        } else {
+            self.script = None;
+        }
+        Ok(())
     }
 
     pub fn get_script(&self) -> Option<&String> {
         self.script.as_ref()
     }
 
-    pub fn set_region(&mut self, value: Option<String>) {
-        self.region = value;
+    pub fn set_region(&mut self, value: &str) -> parser::Result<()> {
+        if !value.is_empty() {
+            self.region = Some(parser::parse_region_subtag(value)?);
+        } else {
+            self.region = None;
+        }
+        Ok(())
     }
 
     pub fn get_region(&self) -> Option<&String> {

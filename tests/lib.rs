@@ -79,8 +79,12 @@ fn test_locale_fixtures(path: &str) {
                 if let Some(language) = o.language {
                     ref_locale.set_language(language.as_str());
                 }
-                ref_locale.set_script(o.script);
-                ref_locale.set_region(o.region);
+                if let Some(script) = o.script {
+                    ref_locale.set_script(script.as_str());
+                }
+                if let Some(region) = o.region {
+                    ref_locale.set_region(region.as_str());
+                }
                 if let Some(variants) = o.variants {
                     for variant in variants {
                         ref_locale.add_variant(variant);

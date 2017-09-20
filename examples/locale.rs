@@ -17,7 +17,7 @@ fn main() {
 
 
     let mut locale = Locale::from("de-DE");
-    locale.set_region(Some("AT".to_owned()));
+    locale.set_region("AT");
 
     println!("======");
     println!("Locale: {}", locale);

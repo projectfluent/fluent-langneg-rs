@@ -78,6 +78,27 @@ pub fn parse_language_subtag(t: &str) -> Result<String> {
     Ok(t.to_lowercase())
 }
 
+pub fn parse_script_subtag(t: &str) -> Result<String> {
+    if t.len() != 4 || !is_alphabetic(t) {
+        return Err(Error::InvalidLanguage);
+    }
+
+    let (first, rest) = t.split_at(1);
+
+    let mut s = first.to_uppercase();
+    s.push_str(rest);
+
+    Ok(s)
+}
+
+pub fn parse_region_subtag(t: &str) -> Result<String> {
+    if t.len() != 2 || !is_alphabetic(t) {
+        return Err(Error::InvalidLanguage);
+    }
+
+    Ok(t.to_uppercase())
+}
+
 pub fn parse_language_tag(t: &str) -> Result<Locale> {
     let mut locale = Locale {
         language: None,
@@ -161,11 +182,11 @@ pub fn parse_language_tag(t: &str) -> Result<Locale> {
                     }
                 } else if position <= 2 && slen == 4 && is_alphabetic(subtag) {
                     // Script
-                    locale.script = Some(subtag.to_owned());
+                    locale.set_script(subtag)?;
                     position = 3;
                 } else if position <= 3 &&
                           (slen == 2 && is_alphabetic(subtag) || slen == 3 && is_numeric(subtag)) {
-                    locale.region = Some(subtag.to_owned());
+                    locale.set_region(subtag)?;
                     position = 4;
                 } else if position <= 4 &&
                           (slen >= 5 && is_alphabetic(&subtag[0..1]) ||
