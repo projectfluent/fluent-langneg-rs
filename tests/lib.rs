@@ -70,7 +70,7 @@ fn test_locale_fixtures(path: &str) {
                 opts.iter().map(|(k, v)| (k.as_str(), v.as_str())).collect();
             loc = Locale::new(&s, Some(borrowed)).unwrap();
         } else {
-            loc = Locale::new(&s, None).unwrap();
+            loc = Locale::from(s);
         }
 
         match test.output {

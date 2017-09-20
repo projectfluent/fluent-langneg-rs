@@ -2,15 +2,12 @@ use super::locale::Locale;
 
 pub fn filter_matches(requested: Vec<&str>, available: Vec<&str>) -> Vec<String> {
 
-    let available_locales: Vec<Locale> = available
-        .iter()
-        .map(|loc| Locale::new(loc, None).unwrap())
-        .collect();
+    let available_locales: Vec<Locale> = available.iter().map(|loc| Locale::from(*loc)).collect();
 
     let mut supported_locales = vec![];
 
     for req_loc_str in requested {
-        let requested_locale = Locale::new(req_loc_str, None).unwrap();
+        let requested_locale = Locale::from(req_loc_str);
 
         if requested_locale.language.is_none() {
             continue;

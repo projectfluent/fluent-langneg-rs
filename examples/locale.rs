@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use fluent_locale::Locale;
 
 fn main() {
-    let locale = Locale::new("en-US", None).unwrap();
+    let locale = Locale::from("en-US");
 
     println!("======");
     println!("Locale: {}", locale);
@@ -16,7 +16,7 @@ fn main() {
 
 
 
-    let mut locale = Locale::new("de-DE", None).unwrap();
+    let mut locale = Locale::from("de-DE");
     locale.region = Some("AT".to_owned());
 
     println!("======");

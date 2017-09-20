@@ -1,6 +1,4 @@
-#![cfg_attr(test, feature(test))]
-
-extern crate test;
+#![feature(test)]
 
 pub mod locale;
 pub mod negotiate;
@@ -10,7 +8,8 @@ pub use negotiate::negotiate_languages;
 
 #[cfg(test)]
 mod tests {
-    use test::Bencher;
+    extern crate test;
+    use self::test::Bencher;
     use locale::Locale;
     use negotiate::negotiate_languages;
 
@@ -20,7 +19,7 @@ mod tests {
                        "zh-Hant", "zh-Hans", "ja-JP", "he-IL", "de-DE", "de-IT"];
 
         b.iter(|| for locale in locales.iter() {
-                   Locale::new(locale, None).unwrap();
+                   Locale::from(*locale);
                });
     }
 
