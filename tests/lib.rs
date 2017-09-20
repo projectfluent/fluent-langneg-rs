@@ -146,6 +146,3 @@ fn options_ext() {
 fn negotiate() {
     test_negotiate_fixtures("./tests/fixtures/negotiate/filtering/exact-match.json");
 }
-
-#[bench]
-
