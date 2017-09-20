@@ -52,8 +52,7 @@ struct NegotiateTestSet {
     output: Vec<String>,
 }
 
-fn read_negotiate_testsets<P: AsRef<Path>>(path: P)
-                                             -> Result<Vec<NegotiateTestSet>, Box<Error>> {
+fn read_negotiate_testsets<P: AsRef<Path>>(path: P) -> Result<Vec<NegotiateTestSet>, Box<Error>> {
     let file = File::open(path)?;
     let sets = serde_json::from_reader(file)?;
     Ok(sets)
@@ -95,10 +94,7 @@ fn test_negotiate_fixtures(path: &str) {
     for test in tests {
         let requested: Vec<&str> = test.input.0.iter().map(|v| v.as_str()).collect();
         let available: Vec<&str> = test.input.1.iter().map(|v| v.as_str()).collect();
-        assert_eq!(
-            negotiate_languages(requested, available),
-            test.output
-        );
+        assert_eq!(negotiate_languages(requested, available), test.output);
     }
 }
 

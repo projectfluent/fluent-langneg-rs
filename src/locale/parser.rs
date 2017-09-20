@@ -125,48 +125,45 @@ pub fn parse_language_tag(t: &str) -> Result<Locale, Error> {
                         locale.extensions = Some(exts);
                     }
                     current_extension = Some(ext_name);
-                } else {
-                    if position == 0 {
-                        // Primary language
-                        if slen < 2 || slen > 3 || !is_alphabetic(subtag) {
-                            return Err(Error::InvalidLanguage);
-                        }
-                        locale.language = Some(subtag.to_owned());
-                        if slen < 4 {
-                            // extlangs are only allowed for short language tags
-                            position = 1;
-                        } else {
-                            position = 2;
-                        }
-                    } else if position == 1 && slen == 3 && is_alphabetic(subtag) {
-                        // extlangs
-                        if let Some(ref mut extlangs) = locale.extlangs {
-                            extlangs.push(subtag.to_owned());
-                        } else {
-                            locale.extlangs = Some(vec![subtag.to_owned()]);
-                        }
-                    } else if position <= 2 && slen == 4 && is_alphabetic(subtag) {
-                        // Script
-                        locale.script = Some(subtag.to_owned());
-                        position = 3;
-                    } else if position <= 3 &&
-                              (slen == 2 && is_alphabetic(subtag) ||
-                               slen == 3 && is_numeric(subtag)) {
-                        locale.region = Some(subtag.to_owned());
-                        position = 4;
-                    } else if position <= 4 &&
-                              (slen >= 5 && is_alphabetic(&subtag[0..1]) ||
-                               slen >= 4 && is_numeric(&subtag[0..1])) {
-                        // Variant
-                        if let Some(ref mut variants) = locale.variants {
-                            variants.push(subtag.to_owned());
-                        } else {
-                            locale.variants = Some(vec![subtag.to_owned()]);
-                        }
-                        position = 4;
-                    } else {
-                        return Err(Error::InvalidSubtag);
+                } else if position == 0 {
+                    // Primary language
+                    if slen < 2 || slen > 3 || !is_alphabetic(subtag) {
+                        return Err(Error::InvalidLanguage);
                     }
+                    locale.language = Some(subtag.to_owned());
+                    if slen < 4 {
+                        // extlangs are only allowed for short language tags
+                        position = 1;
+                    } else {
+                        position = 2;
+                    }
+                } else if position == 1 && slen == 3 && is_alphabetic(subtag) {
+                    // extlangs
+                    if let Some(ref mut extlangs) = locale.extlangs {
+                        extlangs.push(subtag.to_owned());
+                    } else {
+                        locale.extlangs = Some(vec![subtag.to_owned()]);
+                    }
+                } else if position <= 2 && slen == 4 && is_alphabetic(subtag) {
+                    // Script
+                    locale.script = Some(subtag.to_owned());
+                    position = 3;
+                } else if position <= 3 &&
+                          (slen == 2 && is_alphabetic(subtag) || slen == 3 && is_numeric(subtag)) {
+                    locale.region = Some(subtag.to_owned());
+                    position = 4;
+                } else if position <= 4 &&
+                          (slen >= 5 && is_alphabetic(&subtag[0..1]) ||
+                           slen >= 4 && is_numeric(&subtag[0..1])) {
+                    // Variant
+                    if let Some(ref mut variants) = locale.variants {
+                        variants.push(subtag.to_owned());
+                    } else {
+                        locale.variants = Some(vec![subtag.to_owned()]);
+                    }
+                    position = 4;
+                } else {
+                    return Err(Error::InvalidSubtag);
                 }
             }
         }

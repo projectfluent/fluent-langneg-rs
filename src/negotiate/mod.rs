@@ -16,17 +16,17 @@ pub fn filter_matches(requested: Vec<&str>, available: Vec<&str>) -> Vec<String>
             continue;
         }
 
-        for available_locale in available_locales.iter() {
+        for available_locale in &available_locales {
             if requested_locale.language == available_locale.language {
                 supported_locales.push(available_locale.to_string());
             }
         }
     }
 
-    return supported_locales;
+    supported_locales
 }
 
 pub fn negotiate_languages(requested: Vec<&str>, available: Vec<&str>) -> Vec<String> {
     let supported = filter_matches(requested, available);
-    return supported;
+    supported
 }
