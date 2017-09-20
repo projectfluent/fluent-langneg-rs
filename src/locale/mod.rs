@@ -38,10 +38,10 @@ impl fmt::Display for Locale {
 
         if let Some(ref extensions) = self.extensions {
             for (name, ext) in extensions {
-                let mut ext_keys = vec![options::option_key_for_name(name).to_owned()];
+                let mut ext_keys = vec![parser::ext_key_for_name(name).to_owned()];
 
                 for (key, value) in ext {
-                    ext_keys.push(format!("{}-{}", key, value));
+                    ext_keys.push(format!("{}-{}", options::option_key_for_name(key), value));
                 }
 
                 subtags.push(ext_keys.join("-"));

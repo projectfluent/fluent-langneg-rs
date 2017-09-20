@@ -25,9 +25,14 @@ pub fn apply_options(loc: &mut Locale, opts: HashMap<&str, &str>) {
 
             "hour-cycle" => {
                 if let Some(ref mut exts) = loc.extensions {
-                    if let Some(uext) = exts.get_mut("unicode") {
-                        uext.insert("hour-cycle".to_owned(), value.to_owned());
-                    }
+                    let uext = exts.entry("unicode".to_owned()).or_insert(HashMap::new());
+                    uext.insert("hour-cycle".to_owned(), value.to_owned());
+                } else {
+                    let mut exts = HashMap::new();
+                    let mut uext = HashMap::new();
+                    uext.insert("hour-cycle".to_owned(), value.to_owned());
+                    exts.insert("unicode".to_owned(), uext);
+                    loc.extensions = Some(exts);
                 }
             }
             _ => {}
