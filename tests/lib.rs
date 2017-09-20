@@ -7,6 +7,7 @@ use std::path::Path;
 use std::collections::HashMap;
 
 use self::fluent_locale::locale::Locale;
+use self::fluent_locale::negotiate::negotiate_languages;
 
 #[macro_use]
 extern crate serde_derive;
@@ -46,13 +47,13 @@ fn read_locale_testsets<P: AsRef<Path>>(path: P) -> Result<Vec<LocaleTestSet>, B
 }
 
 #[derive(Serialize, Deserialize)]
-struct NegotiationTestSet {
+struct NegotiateTestSet {
     input: (Vec<String>, Vec<String>),
     output: Vec<String>,
 }
 
-fn read_negotiation_testsets<P: AsRef<Path>>(path: P)
-                                             -> Result<Vec<NegotiationTestSet>, Box<Error>> {
+fn read_negotiate_testsets<P: AsRef<Path>>(path: P)
+                                             -> Result<Vec<NegotiateTestSet>, Box<Error>> {
     let file = File::open(path)?;
     let sets = serde_json::from_reader(file)?;
     Ok(sets)
@@ -88,6 +89,19 @@ fn test_locale_fixtures(path: &str) {
     }
 }
 
+fn test_negotiate_fixtures(path: &str) {
+    let tests = read_negotiate_testsets(path).unwrap();
+
+    for test in tests {
+        let requested: Vec<&str> = test.input.0.iter().map(|v| v.as_str()).collect();
+        let available: Vec<&str> = test.input.1.iter().map(|v| v.as_str()).collect();
+        assert_eq!(
+            negotiate_languages(requested, available),
+            test.output
+        );
+    }
+}
+
 #[test]
 fn parse() {
     test_locale_fixtures("./tests/fixtures/locale/parsing.json");
@@ -114,11 +128,7 @@ fn options_ext() {
 }
 
 
-// #[test]
-// fn negotiate() {
-//     let tests = read_negotiation_testsets("./tests/fixtures/negotiate.json").unwrap();
-
-//     for test in tests {
-//         //let loc = Locale::new(&s, None).unwrap();
-//     }
-// }
+#[test]
+fn negotiate() {
+    test_negotiate_fixtures("./tests/fixtures/negotiate/filtering/exact-match.json");
+}

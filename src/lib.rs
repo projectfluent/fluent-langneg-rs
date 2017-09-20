@@ -1,2 +1,2 @@
 pub mod locale;
-pub mod negotiation;
+pub mod negotiate;
