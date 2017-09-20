@@ -9,7 +9,7 @@ pub fn filter_matches(requested: Vec<&str>, available: Vec<&str>) -> Vec<String>
     for req_loc_str in requested {
         let requested_locale = Locale::from(req_loc_str);
 
-        if requested_locale.get_language().is_none() {
+        if requested_locale.get_language().is_empty() {
             continue;
         }
 

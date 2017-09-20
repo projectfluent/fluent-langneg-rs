@@ -13,6 +13,8 @@ fn is_numeric(s: &str) -> bool {
     s.chars().all(|x| x >= '0' && x <= '9')
 }
 
+pub type Result<T> = ::std::result::Result<T, Error>;
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Error {
     /// The same extension subtag is only allowed once in a tag before the private use part.
@@ -68,7 +70,15 @@ pub fn ext_key_for_name(key: &str) -> &'static str {
     }
 }
 
-pub fn parse_language_tag(t: &str) -> Result<Locale, Error> {
+pub fn parse_language_subtag(t: &str) -> Result<String> {
+    if t.len() < 2 || t.len() > 3 || !is_alphabetic(t) {
+        return Err(Error::InvalidLanguage);
+    }
+
+    Ok(t.to_lowercase())
+}
+
+pub fn parse_language_tag(t: &str) -> Result<Locale> {
     let mut locale = Locale {
         language: None,
         extlangs: None,
@@ -135,7 +145,7 @@ pub fn parse_language_tag(t: &str) -> Result<Locale, Error> {
                     if slen < 2 || slen > 3 || !is_alphabetic(subtag) {
                         return Err(Error::InvalidLanguage);
                     }
-                    locale.language = Some(subtag.to_owned());
+                    locale.set_language(subtag)?;
                     if slen < 4 {
                         // extlangs are only allowed for short language tags
                         position = 1;

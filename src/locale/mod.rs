@@ -26,12 +26,20 @@ impl Locale {
         Ok(locale)
     }
 
-    pub fn set_language(&mut self, value: Option<String>) {
-        self.language = value;
+    pub fn set_language(&mut self, value: &str) -> parser::Result<()> {
+        if !value.is_empty() {
+            self.language = Some(parser::parse_language_subtag(value)?);
+        } else {
+            self.language = None;
+        }
+        Ok(())
     }
 
-    pub fn get_language(&self) -> Option<&String> {
-        self.language.as_ref()
+    pub fn get_language(&self) -> &str {
+        if let Some(ref language) = self.language {
+            return language.as_str();
+        }
+        return "";
     }
 
     pub fn set_script(&mut self, value: Option<String>) {
@@ -110,7 +118,7 @@ impl fmt::Display for Locale {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut subtags = vec![];
 
-        subtags.push(self.get_language().as_ref().map_or("und", |l| &l));
+        subtags.push(self.get_language());
 
         if let Some(ref script) = self.script {
             subtags.push(&script);

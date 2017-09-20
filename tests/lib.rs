@@ -76,7 +76,9 @@ fn test_locale_fixtures(path: &str) {
         match test.output {
             LocaleTestOutput::Object(o) => {
                 let mut ref_locale = Locale::from("");
-                ref_locale.set_language(o.language);
+                if let Some(language) = o.language {
+                    ref_locale.set_language(language.as_str());
+                }
                 ref_locale.set_script(o.script);
                 ref_locale.set_region(o.region);
                 if let Some(variants) = o.variants {

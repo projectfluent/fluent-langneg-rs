@@ -36,5 +36,13 @@
       "region": "US",
       "variants": ["windows"]
     }
+  },
+  {
+    "input": {
+      "string": "EN"
+    },
+    "output": {
+      "language": "en"
+    }
   }
 ]
