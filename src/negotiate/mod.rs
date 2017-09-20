@@ -9,12 +9,12 @@ pub fn filter_matches(requested: Vec<&str>, available: Vec<&str>) -> Vec<String>
     for req_loc_str in requested {
         let requested_locale = Locale::from(req_loc_str);
 
-        if requested_locale.language.is_none() {
+        if requested_locale.get_language().is_none() {
             continue;
         }
 
         for available_locale in &available_locales {
-            if requested_locale.language == available_locale.language {
+            if requested_locale.get_language() == available_locale.get_language() {
                 supported_locales.push(available_locale.to_string());
             }
         }

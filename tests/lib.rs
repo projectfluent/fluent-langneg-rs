@@ -75,10 +75,10 @@ fn test_locale_fixtures(path: &str) {
 
         match test.output {
             LocaleTestOutput::Object(o) => {
-                assert_eq!(loc.language, o.language);
-                assert_eq!(loc.script, o.script);
-                assert_eq!(loc.region, o.region);
-                assert_eq!(loc.variants, o.variants);
+                assert_eq!(loc.get_language(), o.language.as_ref());
+                assert_eq!(loc.get_script(), o.script.as_ref());
+                assert_eq!(loc.get_region(), o.region.as_ref());
+                assert_eq!(loc.get_variants(), o.variants.as_ref());
                 assert_eq!(loc.extensions, o.extensions);
             }
             LocaleTestOutput::String(s) => {

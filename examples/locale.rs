@@ -9,15 +9,15 @@ fn main() {
     println!("======");
     println!("Locale: {}", locale);
     println!("-----");
-    println!("language: {:?}", locale.language);
-    println!("script: {:?}", locale.script);
-    println!("region: {:?}", locale.region);
+    println!("language: {:?}", locale.get_language());
+    println!("script: {:?}", locale.get_script());
+    println!("region: {:?}", locale.get_region());
     println!("======\n\n");
 
 
 
     let mut locale = Locale::from("de-DE");
-    locale.region = Some("AT".to_owned());
+    locale.set_region(Some("AT".to_owned()));
 
     println!("======");
     println!("Locale: {}", locale);
