@@ -1,5 +1,5 @@
 use std::fmt;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 mod parser;
 mod options;
@@ -11,12 +11,12 @@ pub struct Locale {
     script: Option<String>,
     region: Option<String>,
     variants: Option<Vec<String>>,
-    extensions: Option<HashMap<String, HashMap<String, String>>>,
+    extensions: Option<BTreeMap<String, BTreeMap<String, String>>>,
     privateuse: Vec<String>,
 }
 
 impl Locale {
-    pub fn new(loc_str: &str, opts: Option<HashMap<&str, &str>>) -> Result<Locale, parser::Error> {
+    pub fn new(loc_str: &str, opts: Option<BTreeMap<&str, &str>>) -> Result<Locale, parser::Error> {
         let mut locale = parser::parse_language_tag(loc_str)?;
 
         if let Some(opts) = opts {
@@ -51,8 +51,11 @@ impl Locale {
         Ok(())
     }
 
-    pub fn get_script(&self) -> Option<&String> {
-        self.script.as_ref()
+    pub fn get_script(&self) -> &str {
+        if let Some(ref script) = self.script {
+            return script.as_str();
+        }
+        return "";
     }
 
     pub fn set_region(&mut self, value: &str) -> parser::Result<()> {
@@ -64,8 +67,11 @@ impl Locale {
         Ok(())
     }
 
-    pub fn get_region(&self) -> Option<&String> {
-        self.region.as_ref()
+    pub fn get_region(&self) -> &str {
+        if let Some(ref region) = self.region {
+            return region.as_str();
+        }
+        return "";
     }
 
     pub fn add_variant(&mut self, value: String) {
@@ -88,10 +94,10 @@ impl Locale {
             .map_or(Vec::new(), |v| v.iter().map(|elem| elem).collect())
     }
 
-    pub fn get_extensions(&self) -> HashMap<String, &HashMap<String, String>> {
+    pub fn get_extensions(&self) -> BTreeMap<String, &BTreeMap<String, String>> {
         self.extensions
             .as_ref()
-            .map_or(HashMap::new(), |map| {
+            .map_or(BTreeMap::new(), |map| {
                 map.iter()
                     .map(|(key, value)| (key.clone(), value))
                     .collect()
@@ -100,11 +106,11 @@ impl Locale {
 
     pub fn add_extension(&mut self, ext_name: String, key: String, value: String) {
         if let Some(ref mut extensions) = self.extensions {
-            let ext = extensions.entry(ext_name).or_insert(HashMap::new());
+            let ext = extensions.entry(ext_name).or_insert(BTreeMap::new());
             ext.insert(key, value);
         } else {
-            let mut exts = HashMap::new();
-            let mut ext = HashMap::new();
+            let mut exts = BTreeMap::new();
+            let mut ext = BTreeMap::new();
             ext.insert(key, value);
             exts.insert(ext_name, ext);
             self.extensions = Some(exts);

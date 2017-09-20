@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fmt::{self, Display};
 use std::error::Error as ErrorTrait;
 use super::Locale;
@@ -153,11 +153,11 @@ pub fn parse_language_tag(t: &str) -> Result<Locale> {
                         if exts.contains_key(ext_name) {
                             return Err(Error::DuplicateExtension);
                         } else {
-                            exts.insert(ext_name.to_owned(), HashMap::new());
+                            exts.insert(ext_name.to_owned(), BTreeMap::new());
                         }
                     } else {
-                        let mut exts = HashMap::new();
-                        exts.insert(ext_name.to_owned(), HashMap::new());
+                        let mut exts = BTreeMap::new();
+                        exts.insert(ext_name.to_owned(), BTreeMap::new());
                         locale.extensions = Some(exts);
                     }
                     current_extension = Some(ext_name);

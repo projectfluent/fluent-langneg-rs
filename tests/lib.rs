@@ -4,7 +4,7 @@ extern crate serde_json;
 use std::error::Error;
 use std::fs::File;
 use std::path::Path;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use self::fluent_locale::locale::Locale;
 use self::fluent_locale::negotiate::negotiate_languages;
@@ -15,7 +15,7 @@ extern crate serde_derive;
 #[derive(Serialize, Deserialize)]
 struct LocaleTestInputData {
     string: String,
-    options: Option<HashMap<String, String>>,
+    options: Option<BTreeMap<String, String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -24,7 +24,7 @@ struct LocaleTestOutputObject {
     script: Option<String>,
     region: Option<String>,
     variants: Option<Vec<String>>,
-    extensions: Option<HashMap<String, HashMap<String, String>>>,
+    extensions: Option<BTreeMap<String, BTreeMap<String, String>>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -66,7 +66,7 @@ fn test_locale_fixtures(path: &str) {
 
         let loc;
         if let Some(opts) = test.input.options {
-            let borrowed: HashMap<&str, &str> =
+            let borrowed: BTreeMap<&str, &str> =
                 opts.iter().map(|(k, v)| (k.as_str(), v.as_str())).collect();
             loc = Locale::new(&s, Some(borrowed)).unwrap();
         } else {

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use super::Locale;
 
 pub fn option_name_for_key(key: &str) -> &'static str {
@@ -18,7 +18,7 @@ pub fn option_key_for_name(key: &str) -> &'static str {
 }
 
 
-pub fn apply_options(loc: &mut Locale, opts: HashMap<&str, &str>) {
+pub fn apply_options(loc: &mut Locale, opts: BTreeMap<&str, &str>) {
     for (key, value) in opts {
         match key {
             "language" => loc.language = Some(value.to_owned()),
@@ -27,11 +27,11 @@ pub fn apply_options(loc: &mut Locale, opts: HashMap<&str, &str>) {
 
             _ => {
                 if let Some(ref mut exts) = loc.extensions {
-                    let uext = exts.entry("unicode".to_owned()).or_insert(HashMap::new());
+                    let uext = exts.entry("unicode".to_owned()).or_insert(BTreeMap::new());
                     uext.insert(key.to_owned(), value.to_owned());
                 } else {
-                    let mut exts = HashMap::new();
-                    let mut uext = HashMap::new();
+                    let mut exts = BTreeMap::new();
+                    let mut uext = BTreeMap::new();
                     uext.insert(key.to_owned(), value.to_owned());
                     exts.insert("unicode".to_owned(), uext);
                     loc.extensions = Some(exts);

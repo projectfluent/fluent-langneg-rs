@@ -1,6 +1,6 @@
 extern crate fluent_locale;
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use fluent_locale::Locale;
 
 fn main() {
@@ -25,7 +25,7 @@ fn main() {
 
 
 
-    let mut options = HashMap::new();
+    let mut options = BTreeMap::new();
     options.insert("hour-cycle", "h12");
 
     let locale = Locale::new("it-IT", Some(options)).unwrap();
