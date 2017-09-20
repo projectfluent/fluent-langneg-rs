@@ -14,5 +14,21 @@
         }
       }
     }
+  },
+  {
+    "input": {
+      "string": "en",
+      "options": {
+        "calendar": "gregory"
+      }
+    },
+    "output": {
+      "language": "en",
+      "extensions": {
+        "unicode": {
+          "calendar": "gregory"
+        }
+      }
+    }
   }
 ]

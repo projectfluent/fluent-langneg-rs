@@ -7,5 +7,15 @@
       }
     },
     "output": "en-u-hc-h12"
+  },
+  {
+    "input": {
+      "string": "ar",
+      "options": {
+        "hour-cycle": "h12",
+        "calendar": "buddhist"
+      }
+    },
+    "output": "ar-u-hc-h12-ca-buddhist"
   }
 ]

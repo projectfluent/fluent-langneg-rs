@@ -102,6 +102,7 @@ pub fn parse_language_tag(t: &str) -> Result<Locale, Error> {
                                 exts.get_mut(ext)
                                     .expect("no entry found for key")
                                     .insert(key.to_owned(), subtag.to_owned());
+                                ext_key = None;
                             }
                         }
                         None => {

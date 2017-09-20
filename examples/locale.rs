@@ -28,7 +28,7 @@ fn main() {
     let mut options = HashMap::new();
     options.insert("hour-cycle", "h12");
 
-    let mut locale = Locale::new("it-IT", Some(options)).unwrap();
+    let locale = Locale::new("it-IT", Some(options)).unwrap();
 
     println!("======");
     println!("Locale: {}", locale);
