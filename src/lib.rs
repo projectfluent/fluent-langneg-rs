@@ -1,4 +1,5 @@
 #![feature(test)]
+#![feature(vec_remove_item)]
 
 pub mod locale;
 pub mod negotiate;

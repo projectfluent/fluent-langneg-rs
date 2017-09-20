@@ -11,7 +11,7 @@ pub struct Locale {
     script: Option<String>,
     region: Option<String>,
     variants: Option<Vec<String>>,
-    pub extensions: Option<HashMap<String, HashMap<String, String>>>,
+    extensions: Option<HashMap<String, HashMap<String, String>>>,
     privateuse: Vec<String>,
 }
 
@@ -50,12 +50,47 @@ impl Locale {
         self.region.as_ref()
     }
 
-    pub fn add_variant(&mut self, value: String) {}
+    pub fn add_variant(&mut self, value: String) {
+        if let Some(ref mut variants) = self.variants {
+            variants.push(value);
+        } else {
+            self.variants = Some(vec![value]);
+        }
+    }
 
-    pub fn remove_variant(&self) {}
+    pub fn remove_variant(&mut self, value: String) {
+        if let Some(ref mut variants) = self.variants {
+            variants.remove_item(&value);
+        }
+    }
 
-    pub fn get_variants(&self) -> Option<&Vec<String>> {
-        self.variants.as_ref()
+    pub fn get_variants(&self) -> Vec<&String> {
+        self.variants
+            .as_ref()
+            .map_or(Vec::new(), |v| v.iter().map(|elem| elem).collect())
+    }
+
+    pub fn get_extensions(&self) -> HashMap<String, &HashMap<String, String>> {
+        self.extensions
+            .as_ref()
+            .map_or(HashMap::new(), |map| {
+                map.iter()
+                    .map(|(key, value)| (key.clone(), value))
+                    .collect()
+            })
+    }
+
+    pub fn add_extension(&mut self, ext_name: String, key: String, value: String) {
+        if let Some(ref mut extensions) = self.extensions {
+            let ext = extensions.entry(ext_name).or_insert(HashMap::new());
+            ext.insert(key, value);
+        } else {
+            let mut exts = HashMap::new();
+            let mut ext = HashMap::new();
+            ext.insert(key, value);
+            exts.insert(ext_name, ext);
+            self.extensions = Some(exts);
+        }
     }
 }
 

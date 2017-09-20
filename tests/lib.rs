@@ -75,11 +75,23 @@ fn test_locale_fixtures(path: &str) {
 
         match test.output {
             LocaleTestOutput::Object(o) => {
-                assert_eq!(loc.get_language(), o.language.as_ref());
-                assert_eq!(loc.get_script(), o.script.as_ref());
-                assert_eq!(loc.get_region(), o.region.as_ref());
-                assert_eq!(loc.get_variants(), o.variants.as_ref());
-                assert_eq!(loc.extensions, o.extensions);
+                let mut ref_locale = Locale::from("");
+                ref_locale.set_language(o.language);
+                ref_locale.set_script(o.script);
+                ref_locale.set_region(o.region);
+                if let Some(variants) = o.variants {
+                    for variant in variants {
+                        ref_locale.add_variant(variant);
+                    }
+                }
+                if let Some(extensions) = o.extensions {
+                    for (ext_name, values) in extensions {
+                        for (key, val) in values {
+                            ref_locale.add_extension(ext_name.clone(), key, val);
+                        }
+                    }
+                }
+                assert_eq!(loc, ref_locale);
             }
             LocaleTestOutput::String(s) => {
                 assert_eq!(loc.to_string(), s);

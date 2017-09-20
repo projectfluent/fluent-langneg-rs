@@ -79,6 +79,10 @@ pub fn parse_language_tag(t: &str) -> Result<Locale, Error> {
         privateuse: vec![],
     };
 
+    if t.len() == 0 {
+        return Ok(locale);
+    }
+
     let mut position = 0;
     let mut current_extension: Option<&str> = None;
     let mut ext_key: Option<&str> = None;
