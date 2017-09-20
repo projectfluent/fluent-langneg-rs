@@ -22,6 +22,7 @@ impl Locale {
         if let Some(opts) = opts {
             options::apply_options(&mut locale, opts);
         }
+
         Ok(locale)
     }
 }
@@ -30,10 +31,20 @@ impl fmt::Display for Locale {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut subtags = vec![];
 
-        if let Some(ref language) = self.language {
-            subtags.push(language.clone());
-        } else {
-            subtags.push("und".to_owned());
+        subtags.push(self.language.clone().unwrap_or("und".to_owned()));
+
+        if let Some(script) = self.script.clone() {
+            subtags.push(script);
+        }
+
+        if let Some(region) = self.region.clone() {
+            subtags.push(region);
+        }
+
+        if let Some(variants) = self.variants.clone() {
+            for variant in variants {
+                subtags.push(variant);
+            }
         }
 
         if let Some(ref extensions) = self.extensions {
