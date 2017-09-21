@@ -4,6 +4,58 @@ use std::collections::BTreeMap;
 mod parser;
 mod options;
 
+/// A Locale object.
+///
+/// Locale object stores information encoded in a language tag and provides
+/// methods allowing for parsing, serializing and manipulating locale fields.
+///
+/// All data is validated and canonicalized on input, which means that
+/// the output is always canonicalized.
+///
+/// # Currently supported subtags are:
+/// * `language` (e.g. "en")
+/// * `script` (e.g. "Latn")
+/// * `region` (e.g. "US")
+/// * `variants` (e.g. "windows")
+/// * `extensions` (e.g. "-u-ca-gregorian-hc-h12")
+///
+/// The API parses correctly the remaining fields of the BCP47 language tag, but
+/// at the moment does not provide any API for operating on them.
+///
+/// # Parsing
+/// Locale supports a `From` trait from `String` and `&str`:
+///
+/// ```
+/// let loc = Locale::from("en-Latn-US");
+/// ```
+///
+/// Locale can also accept options, similarly to ECMA402 Intl.Locale:
+///
+/// ```
+/// let opts = BTreeMap::new();
+/// opts.insert("hour-cycle", "h12");
+/// let loc = Locale::new("en-Latn-US", opts);
+/// ```
+///
+/// # Serializing
+/// Locale supports `Display` trait allowing for:
+///
+/// ```
+/// let opts = BTreeMap::new();
+/// opts.insert("hour-cycle", "h12");
+/// let loc = Locale::new("en-Latn-US", opts);
+/// loc.to_string(); // "en-Latn-US-u-hc-h12"
+/// ```
+///
+/// # Manipulating
+/// During the lifetime of `Locale`, its fields can be modified via getter/setter
+/// methods:
+///
+/// ```
+/// let loc = Locale::from("en-Latn-US");
+/// loc.set_region("GB");
+/// loc.to_string(); // "en-Latn-GB"
+/// ```
 #[derive(Debug, Default, PartialEq, Clone)]
 pub struct Locale {
     language: Option<String>,
