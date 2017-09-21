@@ -22,39 +22,57 @@ mod options;
 /// The API parses correctly the remaining fields of the BCP47 language tag, but
 /// at the moment does not provide any API for operating on them.
 ///
-/// # Parsing
+/// # Examples
+///
+/// ## Parsing
 /// Locale supports a `From` trait from `String` and `&str`:
 ///
 /// ```
-/// let loc = Locale::from("en-Latn-US");
+/// use fluent_locale::Locale;
+///
+/// let loc = Locale::from("en-latn-us");
+///
+/// assert_eq!(loc.to_string(), "en-Latn-US");
 /// ```
 ///
 /// Locale can also accept options, similarly to ECMA402 Intl.Locale:
 ///
 /// ```
-/// let opts = BTreeMap::new();
+/// use fluent_locale::Locale;
+/// use std::collections::BTreeMap;
+///
+/// let mut opts = BTreeMap::new();
 /// opts.insert("hour-cycle", "h12");
-/// let loc = Locale::new("en-Latn-US", opts);
+/// let loc = Locale::new("en", Some(opts)).unwrap();
+///
+/// assert_eq!(loc.to_string(), "en-u-hc-h12");
 /// ```
 ///
-/// # Serializing
+/// ## Serializing
 /// Locale supports `Display` trait allowing for:
 ///
 /// ```
-/// let opts = BTreeMap::new();
+/// use fluent_locale::Locale;
+/// use std::collections::BTreeMap;
+///
+/// let mut opts = BTreeMap::new();
 /// opts.insert("hour-cycle", "h12");
-/// let loc = Locale::new("en-Latn-US", opts);
-/// loc.to_string(); // "en-Latn-US-u-hc-h12"
+/// let loc = Locale::new("en-Latn-US-u-hc-h23", Some(opts)).unwrap();
+///
+/// assert_eq!(loc.to_string(), "en-Latn-US-u-hc-h12");
 /// ```
 ///
-/// # Manipulating
+/// ## Manipulating
 /// During the lifetime of `Locale`, its fields can be modified via getter/setter
 /// methods:
 ///
 /// ```
-/// let loc = Locale::from("en-Latn-US");
+/// use fluent_locale::Locale;
+///
+/// let mut loc = Locale::from("en-Latn-US");
 /// loc.set_region("GB");
-/// loc.to_string(); // "en-Latn-GB"
+///
+/// assert_eq!(loc.to_string(), "en-Latn-GB");
 /// ```
 #[derive(Debug, Default, PartialEq, Clone)]
 pub struct Locale {
@@ -167,6 +185,30 @@ impl Locale {
             exts.insert(ext_name, ext);
             self.extensions = Some(exts);
         }
+    }
+
+    pub fn matches(&self, other: &Locale, range: bool) -> bool {
+        let language = self.get_language();
+        if (range && self.language.is_none()) || (language != other.get_language()) {
+            return false;
+        }
+
+        let script = self.get_script();
+        if (range && !script.is_empty()) || (script != other.get_script()) {
+            return false;
+        }
+
+        let region = self.get_region();
+        if (range && !region.is_empty()) || (region != other.get_region()) {
+            return false;
+        }
+
+        let variants = self.get_variants();
+        if (range && variants.len() != 0) || (variants != other.get_variants()) {
+            return false;
+        }
+
+        return true;
     }
 }
 

@@ -77,13 +77,13 @@ fn test_locale_fixtures(path: &str) {
             LocaleTestOutput::Object(o) => {
                 let mut ref_locale = Locale::from("");
                 if let Some(language) = o.language {
-                    ref_locale.set_language(language.as_str());
+                    ref_locale.set_language(language.as_str()).unwrap();
                 }
                 if let Some(script) = o.script {
-                    ref_locale.set_script(script.as_str());
+                    ref_locale.set_script(script.as_str()).unwrap();
                 }
                 if let Some(region) = o.region {
-                    ref_locale.set_region(region.as_str());
+                    ref_locale.set_region(region.as_str()).unwrap();
                 }
                 if let Some(variants) = o.variants {
                     for variant in variants {
