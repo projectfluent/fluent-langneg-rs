@@ -57,17 +57,17 @@ impl Display for Error {
     }
 }
 
-pub fn ext_name_for_key(key: &str) -> &'static str {
+pub fn ext_name_for_key<'a>(key: &'a str) -> &'a str {
     match key {
         "u" => "unicode",
-        _ => unimplemented!(),
+        _ => key,
     }
 }
 
-pub fn ext_key_for_name(key: &str) -> &'static str {
+pub fn ext_key_for_name<'a>(key: &'a str) -> &'a str {
     match key {
         "unicode" => "u",
-        _ => unimplemented!(),
+        _ => key,
     }
 }
 
@@ -87,7 +87,7 @@ pub fn parse_script_subtag(t: &str) -> Result<String> {
     let (first, rest) = t.split_at(1);
 
     let mut s = first.to_uppercase();
-    s.push_str(rest);
+    s.push_str(rest.to_lowercase().as_str());
 
     Ok(s)
 }
@@ -149,6 +149,9 @@ pub fn parse_language_tag(t: &str) -> Result<Locale> {
             }
             None => {
                 if slen == 1 {
+                    if !is_alphabetic(subtag) {
+                        return Err(Error::InvalidSubtag);
+                    }
                     let ext_name = ext_name_for_key(subtag);
                     if let Some(ref mut exts) = locale.extensions {
                         if exts.contains_key(ext_name) {

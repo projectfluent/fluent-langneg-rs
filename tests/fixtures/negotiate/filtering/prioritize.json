@@ -22,5 +22,9 @@
   {
     "input": [["en-US"], ["en-GB", "en"]],
     "output": ["en", "en-GB"]
+  },
+  {
+    "input": [["fr-CA-macos", "de-DE"], ["de-DE", "fr-FR-windows"]],
+    "output": ["fr-FR-windows", "de-DE"]
   }
 ]

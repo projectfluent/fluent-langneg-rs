@@ -130,9 +130,13 @@ fn filter_matches<'a>(requested: Vec<&'a str>, mut available: Vec<&'a str>) -> V
 
     let mut available_locales: HashMap<&str, Locale> = HashMap::new();
 
-    for loc in available.iter() {
-        available_locales.insert(loc, Locale::from(*loc));
-    }
+    available.retain(|tag| match Locale::new(tag, None) {
+        Ok(loc) => {
+            available_locales.insert(tag, loc);
+            true
+        }
+        Err(_) => false,
+    });
 
     let mut supported_locales = vec![];
 

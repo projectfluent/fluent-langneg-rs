@@ -121,14 +121,21 @@ fn test_negotiate_fixtures(path: &str) {
             NegotiateTestInput::NoDefault(r, a) => {
                 let requested: Vec<&str> = r.iter().map(|v| v.as_str()).collect();
                 let available: Vec<&str> = a.iter().map(|v| v.as_str()).collect();
-                assert_eq!(negotiate_languages(requested, available, None), test.output);
+                assert_eq!(
+                    negotiate_languages(requested, available, None),
+                    test.output,
+                    "Test in {} failed",
+                    path
+                );
             }
             NegotiateTestInput::Default(r, a, default) => {
                 let requested: Vec<&str> = r.iter().map(|v| v.as_str()).collect();
                 let available: Vec<&str> = a.iter().map(|v| v.as_str()).collect();
                 assert_eq!(
                     negotiate_languages(requested, available, Some(default.as_str())),
-                    test.output
+                    test.output,
+                    "Test in {} failed",
+                    path
                 );
             }
         }

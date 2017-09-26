@@ -224,13 +224,13 @@ impl Locale {
 
 impl From<String> for Locale {
     fn from(s: String) -> Self {
-        Locale::new(s.as_str(), None).unwrap()
+        Locale::new(s.as_str(), None).unwrap_or(Locale::new("", None).unwrap())
     }
 }
 
 impl<'a> From<&'a str> for Locale {
     fn from(s: &'a str) -> Self {
-        Locale::new(s, None).unwrap()
+        Locale::new(s, None).unwrap_or(Locale::new("", None).unwrap())
     }
 }
 
