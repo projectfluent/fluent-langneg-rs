@@ -1,0 +1,7 @@
+[
+  {
+    "input": [["fr-FR", "en"], ["en-US", "fr-FR", "en", "fr"], "en-US"],
+    "strategy": "lookup",
+    "output": ["fr-FR"]
+  }
+]

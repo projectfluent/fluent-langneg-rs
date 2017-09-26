@@ -9,6 +9,7 @@ use std::collections::BTreeMap;
 
 use self::fluent_locale::locale::Locale;
 use self::fluent_locale::negotiate::negotiate_languages;
+use self::fluent_locale::negotiate::NegotiationStrategy;
 
 #[macro_use]
 extern crate serde_derive;
@@ -56,6 +57,7 @@ enum NegotiateTestInput {
 #[derive(Serialize, Deserialize)]
 struct NegotiateTestSet {
     input: NegotiateTestInput,
+    strategy: Option<String>,
     output: Vec<String>,
 }
 
@@ -117,12 +119,21 @@ fn test_negotiate_fixtures(path: &str) {
     let tests = read_negotiate_testsets(path).unwrap();
 
     for test in tests {
+        let strategy = match test.strategy {
+            Some(strategy) => match strategy.as_str() {
+                "filtering" => NegotiationStrategy::Filtering,
+                "matching" => NegotiationStrategy::Matching,
+                "lookup" => NegotiationStrategy::Lookup,
+                _ => NegotiationStrategy::Filtering,
+            },
+            _ => NegotiationStrategy::Filtering
+        };
         match test.input {
             NegotiateTestInput::NoDefault(r, a) => {
                 let requested: Vec<&str> = r.iter().map(|v| v.as_str()).collect();
                 let available: Vec<&str> = a.iter().map(|v| v.as_str()).collect();
                 assert_eq!(
-                    negotiate_languages(requested, available, None),
+                    negotiate_languages(requested, available, None, strategy),
                     test.output,
                     "Test in {} failed",
                     path
@@ -132,7 +143,7 @@ fn test_negotiate_fixtures(path: &str) {
                 let requested: Vec<&str> = r.iter().map(|v| v.as_str()).collect();
                 let available: Vec<&str> = a.iter().map(|v| v.as_str()).collect();
                 assert_eq!(
-                    negotiate_languages(requested, available, Some(default.as_str())),
+                    negotiate_languages(requested, available, Some(default.as_str()), strategy),
                     test.output,
                     "Test in {} failed",
                     path
@@ -170,6 +181,16 @@ fn options_ext() {
 #[test]
 fn negotiate_filtering() {
     let paths = fs::read_dir("./tests/fixtures/negotiate/filtering").unwrap();
+
+    for path in paths {
+        let p = path.unwrap().path().to_str().unwrap().to_owned();
+        test_negotiate_fixtures(p.as_str());
+    }
+}
+
+#[test]
+fn negotiate_matching() {
+    let paths = fs::read_dir("./tests/fixtures/negotiate/matching").unwrap();
 
     for path in paths {
         let p = path.unwrap().path().to_str().unwrap().to_owned();

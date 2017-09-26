@@ -12,11 +12,13 @@
 //!
 //! ```
 //! use fluent_locale::negotiate_languages;
+//! use fluent_locale::NegotiationStrategy;
 //!
 //! let supported = negotiate_languages(
 //!   vec!["pl", "fr", "en-US"],                 // requested
 //!   vec!["it", "de", "fr", "en-GB", "en-US"],  // available
-//!   Some("en-US")                              // default
+//!   Some("en-US"),                             // default
+//!   NegotiationStrategy::Filtering             // strategy
 //! );
 //! assert_eq!(supported, vec!["fr", "en-US", "en-GB"]);
 //! ```
@@ -111,6 +113,13 @@
 use std::collections::HashMap;
 use super::locale::Locale;
 
+#[derive(PartialEq, Debug)]
+pub enum NegotiationStrategy {
+    Filtering,
+    Matching,
+    Lookup,
+}
+
 fn add_likely_subtags(s: &str) -> Option<&str> {
     let extended = match s {
         "en" => "en-Latn-US",
@@ -126,7 +135,11 @@ fn add_likely_subtags(s: &str) -> Option<&str> {
     return Some(extended);
 }
 
-fn filter_matches<'a>(requested: Vec<&'a str>, mut available: Vec<&'a str>) -> Vec<&'a str> {
+fn filter_matches<'a>(
+    requested: Vec<&'a str>,
+    mut available: Vec<&'a str>,
+    strategy: NegotiationStrategy,
+) -> Vec<&'a str> {
 
     let mut available_locales: HashMap<&str, Locale> = HashMap::new();
 
@@ -147,77 +160,150 @@ fn filter_matches<'a>(requested: Vec<&'a str>, mut available: Vec<&'a str>) -> V
 
         let mut requested_locale = Locale::from(req_loc_str);
 
+        let mut match_found = false;
+
         // 1) Try to find a simple (case-insensitive) string match for the request.
         available.retain(|key| {
+            if strategy != NegotiationStrategy::Filtering && match_found {
+                return true;
+            }
+
             if available_locales
                 .get(key)
                 .expect("Available key should be available")
                 .matches(&requested_locale, false, false)
             {
                 supported_locales.push(*key);
+                match_found = true;
                 return false;
             }
             return true;
         });
 
+        if match_found {
+            match strategy {
+                NegotiationStrategy::Filtering => {}
+                NegotiationStrategy::Matching => continue,
+                NegotiationStrategy::Lookup => break,
+            };
+        }
+
         // 2) Try to match against the available locales treated as ranges.
         available.retain(|key| {
+            if strategy != NegotiationStrategy::Filtering && match_found {
+                return true;
+            }
+
             if available_locales
                 .get(key)
                 .expect("Available key should be available")
                 .matches(&requested_locale, true, false)
             {
                 supported_locales.push(*key);
+                match_found = true;
                 return false;
             }
             return true;
         });
 
+        if match_found {
+            match strategy {
+                NegotiationStrategy::Filtering => {}
+                NegotiationStrategy::Matching => continue,
+                NegotiationStrategy::Lookup => break,
+            };
+        }
+
+        match_found = false;
+
         // 3) Try to match against a maximized version of the requested locale
         if let Some(extended) = add_likely_subtags(requested_locale.to_string().as_ref()) {
             requested_locale = Locale::from(extended);
             available.retain(|key| {
+                if strategy != NegotiationStrategy::Filtering && match_found {
+                    return true;
+                }
+
                 if available_locales
                     .get(key)
                     .expect("Available key should be available")
                     .matches(&requested_locale, true, false)
                 {
                     supported_locales.push(*key);
+                    match_found = true;
                     return false;
                 }
                 return true;
             });
         }
 
+        if match_found {
+            match strategy {
+                NegotiationStrategy::Filtering => {}
+                NegotiationStrategy::Matching => continue,
+                NegotiationStrategy::Lookup => break,
+            };
+        }
+
+        match_found = false;
+
         // 4) Try to match against a variant as a range
         requested_locale.clear_variants();
         available.retain(|key| {
+            if strategy != NegotiationStrategy::Filtering && match_found {
+                return true;
+            }
+
             if available_locales
                 .get(key)
                 .expect("Available key should be available")
                 .matches(&requested_locale, true, true)
             {
                 supported_locales.push(*key);
+                match_found = true;
                 return false;
             }
             return true;
         });
+
+        if match_found {
+            match strategy {
+                NegotiationStrategy::Filtering => {}
+                NegotiationStrategy::Matching => continue,
+                NegotiationStrategy::Lookup => break,
+            };
+        }
+
+        match_found = false;
 
         // 5) Try to match against the likely subtag without region
 
         // 6) Try to match against a region as a range
         requested_locale.set_region("").unwrap();
         available.retain(|key| {
+            if strategy != NegotiationStrategy::Filtering && match_found {
+                return true;
+            }
+
             if available_locales
                 .get(key)
                 .expect("Available key should be available")
                 .matches(&requested_locale, true, true)
             {
                 supported_locales.push(*key);
+                match_found = true;
                 return false;
             }
             return true;
         });
+
+        if match_found {
+            match strategy {
+                NegotiationStrategy::Filtering => {}
+                NegotiationStrategy::Matching => continue,
+                NegotiationStrategy::Lookup => break,
+            };
+        }
     }
 
     supported_locales
@@ -227,8 +313,9 @@ pub fn negotiate_languages<'a>(
     requested: Vec<&'a str>,
     available: Vec<&'a str>,
     default: Option<&'a str>,
+    strategy: NegotiationStrategy,
 ) -> Vec<&'a str> {
-    let mut supported = filter_matches(requested, available);
+    let mut supported = filter_matches(requested, available, strategy);
 
     if let Some(d) = default {
         if !supported.contains(&d) {
