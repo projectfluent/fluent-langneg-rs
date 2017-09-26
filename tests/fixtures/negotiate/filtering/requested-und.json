@@ -1,0 +1,6 @@
+[
+  {
+    "input": [["und"], ["de", "pl-PL", "it", "fr-Latn-CA", "ru"]],
+    "output": ["de", "pl-PL", "it", "fr-Latn-CA", "ru"]
+  }
+]

@@ -14,10 +14,11 @@
 //! use fluent_locale::negotiate_languages;
 //!
 //! let supported = negotiate_languages(
-//!   vec!["pl", "fr", "en-US"],                // requested
-//!   vec!["it", "de", "fr", "en-GB", "en-US"]  // available
+//!   vec!["pl", "fr", "en-US"],                 // requested
+//!   vec!["it", "de", "fr", "en-GB", "en-US"],  // available
+//!   Some("en-US")                              // default
 //! );
-//! assert_eq!(supported, vec!["fr", "en-US"]);
+//! assert_eq!(supported, vec!["fr", "en-US", "en-GB"]);
 //! ```
 //!
 //! # The exact algorithm is custom, and consists of a 6 level strategy:
@@ -115,74 +116,120 @@ fn add_likely_subtags(s: &str) -> Option<&str> {
         "en" => "en-Latn-US",
         "fr" => "fr-Latn-FR",
         "sr" => "sr-Cyrl-SR",
+        "sr-RU" => "sr-Latn-RU",
+        "az-IR" => "az-Arab-IR",
+        "zh-GB" => "zh-Hant-GB",
+        "zh-US" => "zh-Hant-US",
         _ => return None,
     };
 
     return Some(extended);
 }
 
-fn filter_matches<'a>(requested: Vec<&'a str>, available: Vec<&'a str>) -> Vec<&'a str> {
+fn filter_matches<'a>(requested: Vec<&'a str>, mut available: Vec<&'a str>) -> Vec<&'a str> {
 
     let mut available_locales: HashMap<&str, Locale> = HashMap::new();
 
-    for loc in available {
-        available_locales.insert(loc, Locale::from(loc));
+    for loc in available.iter() {
+        available_locales.insert(loc, Locale::from(*loc));
     }
 
     let mut supported_locales = vec![];
 
     for req_loc_str in requested {
-        let mut requested_locale = Locale::from(req_loc_str);
-
-        if requested_locale.get_language().is_empty() {
+        if req_loc_str.is_empty() {
             continue;
         }
 
+        let mut requested_locale = Locale::from(req_loc_str);
+
         // 1) Try to find a simple (case-insensitive) string match for the request.
-        available_locales.retain(|key, loc| {
-                                     if loc.matches(&requested_locale, false) {
-                                         supported_locales.push(*key);
-                                         return false;
-                                     }
-                                     return true;
-                                 });
+        available.retain(|key| {
+            if available_locales
+                .get(key)
+                .expect("Available key should be available")
+                .matches(&requested_locale, false, false)
+            {
+                supported_locales.push(*key);
+                return false;
+            }
+            return true;
+        });
 
         // 2) Try to match against the available locales treated as ranges.
-        available_locales.retain(|key, loc| {
-                                     if loc.matches(&requested_locale, true) {
-                                         supported_locales.push(*key);
-                                         return false;
-                                     }
-                                     return true;
-                                 });
+        available.retain(|key| {
+            if available_locales
+                .get(key)
+                .expect("Available key should be available")
+                .matches(&requested_locale, true, false)
+            {
+                supported_locales.push(*key);
+                return false;
+            }
+            return true;
+        });
 
         // 3) Try to match against a maximized version of the requested locale
         if let Some(extended) = add_likely_subtags(requested_locale.to_string().as_ref()) {
             requested_locale = Locale::from(extended);
-            available_locales.retain(|key, loc| {
-                                         if loc.matches(&requested_locale, true) {
-                                             supported_locales.push(*key);
-                                             return false;
-                                         }
-                                         return true;
-                                     });
+            available.retain(|key| {
+                if available_locales
+                    .get(key)
+                    .expect("Available key should be available")
+                    .matches(&requested_locale, true, false)
+                {
+                    supported_locales.push(*key);
+                    return false;
+                }
+                return true;
+            });
         }
+
+        // 4) Try to match against a variant as a range
+        requested_locale.clear_variants();
+        available.retain(|key| {
+            if available_locales
+                .get(key)
+                .expect("Available key should be available")
+                .matches(&requested_locale, true, true)
+            {
+                supported_locales.push(*key);
+                return false;
+            }
+            return true;
+        });
+
+        // 5) Try to match against the likely subtag without region
 
         // 6) Try to match against a region as a range
         requested_locale.set_region("").unwrap();
-        available_locales.retain(|key, loc| {
-                                     if loc.matches(&requested_locale, true) {
-                                         supported_locales.push(*key);
-                                         return false;
-                                     }
-                                     return true;
-                                 });
+        available.retain(|key| {
+            if available_locales
+                .get(key)
+                .expect("Available key should be available")
+                .matches(&requested_locale, true, true)
+            {
+                supported_locales.push(*key);
+                return false;
+            }
+            return true;
+        });
     }
 
     supported_locales
 }
 
-pub fn negotiate_languages<'a>(requested: Vec<&'a str>, available: Vec<&'a str>) -> Vec<&'a str> {
-    let supported = filter_matches(requested, available);
+pub fn negotiate_languages<'a>(
+    requested: Vec<&'a str>,
+    available: Vec<&'a str>,
+    default: Option<&'a str>,
+) -> Vec<&'a str> {
+    let mut supported = filter_matches(requested, available);
+
+    if let Some(d) = default {
+        if !supported.contains(&d) {
+            supported.push(d);
+        }
+    }
     supported
 }

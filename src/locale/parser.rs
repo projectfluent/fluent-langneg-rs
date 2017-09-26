@@ -5,8 +5,9 @@ use super::Locale;
 use super::options;
 
 fn is_alphabetic(s: &str) -> bool {
-    s.chars()
-        .all(|x| x >= 'A' && x <= 'Z' || x >= 'a' && x <= 'z')
+    s.chars().all(
+        |x| x >= 'A' && x <= 'Z' || x >= 'a' && x <= 'z',
+    )
 }
 
 fn is_numeric(s: &str) -> bool {
@@ -80,7 +81,7 @@ pub fn parse_language_subtag(t: &str) -> Result<String> {
 
 pub fn parse_script_subtag(t: &str) -> Result<String> {
     if t.len() != 4 || !is_alphabetic(t) {
-        return Err(Error::InvalidLanguage);
+        return Err(Error::InvalidSubtag);
     }
 
     let (first, rest) = t.split_at(1);
@@ -92,11 +93,10 @@ pub fn parse_script_subtag(t: &str) -> Result<String> {
 }
 
 pub fn parse_region_subtag(t: &str) -> Result<String> {
-    if t.len() != 2 || !is_alphabetic(t) {
-        return Err(Error::InvalidLanguage);
+    if (t.len() == 2 && is_alphabetic(t)) || (t.len() == 3 && is_numeric(t)) {
+        return Ok(t.to_uppercase());
     }
-
-    Ok(t.to_uppercase())
+    Err(Error::InvalidSubtag)
 }
 
 pub fn parse_language_tag(t: &str) -> Result<Locale> {
@@ -134,9 +134,10 @@ pub fn parse_language_tag(t: &str) -> Result<Locale> {
                     match ext_key {
                         Some(key) => {
                             if let Some(ref mut exts) = locale.extensions {
-                                exts.get_mut(ext)
-                                    .expect("no entry found for key")
-                                    .insert(key.to_owned(), subtag.to_owned());
+                                exts.get_mut(ext).expect("no entry found for key").insert(
+                                    key.to_owned(),
+                                    subtag.to_owned(),
+                                );
                                 ext_key = None;
                             }
                         }
@@ -185,12 +186,14 @@ pub fn parse_language_tag(t: &str) -> Result<Locale> {
                     locale.set_script(subtag)?;
                     position = 3;
                 } else if position <= 3 &&
-                          (slen == 2 && is_alphabetic(subtag) || slen == 3 && is_numeric(subtag)) {
+                           (slen == 2 && is_alphabetic(subtag) || slen == 3 && is_numeric(subtag))
+                {
                     locale.set_region(subtag)?;
                     position = 4;
                 } else if position <= 4 &&
-                          (slen >= 5 && is_alphabetic(&subtag[0..1]) ||
-                           slen >= 4 && is_numeric(&subtag[0..1])) {
+                           (slen >= 5 && is_alphabetic(&subtag[0..1]) ||
+                                slen >= 4 && is_numeric(&subtag[0..1]))
+                {
                     // Variant
                     if let Some(ref mut variants) = locale.variants {
                         variants.push(subtag.to_owned());

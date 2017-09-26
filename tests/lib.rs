@@ -3,6 +3,7 @@ extern crate serde_json;
 
 use std::error::Error;
 use std::fs::File;
+use std::fs;
 use std::path::Path;
 use std::collections::BTreeMap;
 
@@ -47,8 +48,14 @@ fn read_locale_testsets<P: AsRef<Path>>(path: P) -> Result<Vec<LocaleTestSet>, B
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(untagged)]
+enum NegotiateTestInput {
+    NoDefault(Vec<String>, Vec<String>),
+    Default(Vec<String>, Vec<String>, String),
+}
+#[derive(Serialize, Deserialize)]
 struct NegotiateTestSet {
-    input: (Vec<String>, Vec<String>),
+    input: NegotiateTestInput,
     output: Vec<String>,
 }
 
@@ -110,9 +117,21 @@ fn test_negotiate_fixtures(path: &str) {
     let tests = read_negotiate_testsets(path).unwrap();
 
     for test in tests {
-        let requested: Vec<&str> = test.input.0.iter().map(|v| v.as_str()).collect();
-        let available: Vec<&str> = test.input.1.iter().map(|v| v.as_str()).collect();
-        assert_eq!(negotiate_languages(requested, available), test.output);
+        match test.input {
+            NegotiateTestInput::NoDefault(r, a) => {
+                let requested: Vec<&str> = r.iter().map(|v| v.as_str()).collect();
+                let available: Vec<&str> = a.iter().map(|v| v.as_str()).collect();
+                assert_eq!(negotiate_languages(requested, available, None), test.output);
+            }
+            NegotiateTestInput::Default(r, a, default) => {
+                let requested: Vec<&str> = r.iter().map(|v| v.as_str()).collect();
+                let available: Vec<&str> = a.iter().map(|v| v.as_str()).collect();
+                assert_eq!(
+                    negotiate_languages(requested, available, Some(default.as_str())),
+                    test.output
+                );
+            }
+        }
     }
 }
 
@@ -141,8 +160,12 @@ fn options_ext() {
     test_locale_fixtures("./tests/fixtures/locale/options-ext.json");
 }
 
-
 #[test]
-fn negotiate() {
-    test_negotiate_fixtures("./tests/fixtures/negotiate/filtering/exact-match.json");
+fn negotiate_filtering() {
+    let paths = fs::read_dir("./tests/fixtures/negotiate/filtering").unwrap();
+
+    for path in paths {
+        let p = path.unwrap().path().to_str().unwrap().to_owned();
+        test_negotiate_fixtures(p.as_str());
+    }
 }

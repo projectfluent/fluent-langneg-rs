@@ -70,7 +70,7 @@ mod options;
 /// use fluent_locale::Locale;
 ///
 /// let mut loc = Locale::from("en-Latn-US");
-/// loc.set_region("GB");
+/// loc.set_region("GB").unwrap();
 ///
 /// assert_eq!(loc.to_string(), "en-Latn-GB");
 /// ```
@@ -97,7 +97,7 @@ impl Locale {
     }
 
     pub fn set_language(&mut self, value: &str) -> parser::Result<()> {
-        if !value.is_empty() {
+        if !value.is_empty() && value != "und" {
             self.language = Some(parser::parse_language_subtag(value)?);
         } else {
             self.language = None;
@@ -159,19 +159,21 @@ impl Locale {
     }
 
     pub fn get_variants(&self) -> Vec<&String> {
-        self.variants
-            .as_ref()
-            .map_or(Vec::new(), |v| v.iter().map(|elem| elem).collect())
+        self.variants.as_ref().map_or(Vec::new(), |v| {
+            v.iter().map(|elem| elem).collect()
+        })
+    }
+
+    pub fn clear_variants(&mut self) {
+        self.variants = None;
     }
 
     pub fn get_extensions(&self) -> BTreeMap<String, &BTreeMap<String, String>> {
-        self.extensions
-            .as_ref()
-            .map_or(BTreeMap::new(), |map| {
-                map.iter()
-                    .map(|(key, value)| (key.clone(), value))
-                    .collect()
-            })
+        self.extensions.as_ref().map_or(BTreeMap::new(), |map| {
+            map.iter()
+                .map(|(key, value)| (key.clone(), value))
+                .collect()
+        })
     }
 
     pub fn add_extension(&mut self, ext_name: String, key: String, value: String) {
@@ -187,24 +189,32 @@ impl Locale {
         }
     }
 
-    pub fn matches(&self, other: &Locale, range: bool) -> bool {
-        let language = self.get_language();
-        if (range && self.language.is_none()) || (language != other.get_language()) {
+    pub fn matches(&self, other: &Locale, available_range: bool, requested_range: bool) -> bool {
+        if (!available_range || !self.language.is_none()) &&
+            (!requested_range || !other.get_language().is_empty()) &&
+            self.get_language() != other.get_language()
+        {
             return false;
         }
 
-        let script = self.get_script();
-        if (range && !script.is_empty()) || (script != other.get_script()) {
+        if (!available_range || !self.script.is_none()) &&
+            (!requested_range || !other.get_script().is_empty()) &&
+            self.get_script() != other.get_script()
+        {
             return false;
         }
 
-        let region = self.get_region();
-        if (range && !region.is_empty()) || (region != other.get_region()) {
+        if (!available_range || !self.region.is_none()) &&
+            (!requested_range || !other.get_region().is_empty()) &&
+            self.get_region() != other.get_region()
+        {
             return false;
         }
 
-        let variants = self.get_variants();
-        if (range && variants.len() != 0) || (variants != other.get_variants()) {
+        if (!available_range || !self.variants.is_none()) &&
+            (!requested_range || !other.get_variants().is_empty()) &&
+            self.get_variants() != other.get_variants()
+        {
             return false;
         }
 
