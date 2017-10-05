@@ -20,6 +20,10 @@
     "output": ["sr-Latn"]
   },
   {
+    "input": [["sr"], ["sr-Latn", "sr-Cyrl"]],
+    "output": ["sr-Cyrl"]
+  },
+  {
     "input": [["zh-GB"], ["zh-Hans", "zh-Hant"]],
     "output": ["zh-Hant"]
   },
@@ -28,7 +32,7 @@
     "output": ["ru"]
   },
   {
-    "input": [["sr-RU"], ["sr-Latn-RU", "sr-Cyrl"]],
-    "output": ["sr-Latn-RU"]
+    "input": [["sr-RU"], ["sr-Latn-RO", "sr-Cyrl"]],
+    "output": ["sr-Latn-RO"]
   }
 ]

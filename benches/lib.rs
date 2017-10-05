@@ -54,6 +54,11 @@ fn bench_negotiate(b: &mut Bencher) {
     ];
 
     b.iter(|| {
-        negotiate_languages(requested.clone(), available.clone());
+        negotiate_languages(
+            requested.clone(),
+            available.clone(),
+            None,
+            fluent_locale::NegotiationStrategy::Filtering,
+        );
     });
 }

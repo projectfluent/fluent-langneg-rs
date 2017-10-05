@@ -120,13 +120,15 @@ fn test_negotiate_fixtures(path: &str) {
 
     for test in tests {
         let strategy = match test.strategy {
-            Some(strategy) => match strategy.as_str() {
-                "filtering" => NegotiationStrategy::Filtering,
-                "matching" => NegotiationStrategy::Matching,
-                "lookup" => NegotiationStrategy::Lookup,
-                _ => NegotiationStrategy::Filtering,
-            },
-            _ => NegotiationStrategy::Filtering
+            Some(strategy) => {
+                match strategy.as_str() {
+                    "filtering" => NegotiationStrategy::Filtering,
+                    "matching" => NegotiationStrategy::Matching,
+                    "lookup" => NegotiationStrategy::Lookup,
+                    _ => NegotiationStrategy::Filtering,
+                }
+            }
+            _ => NegotiationStrategy::Filtering,
         };
         match test.input {
             NegotiateTestInput::NoDefault(r, a) => {

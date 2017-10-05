@@ -277,6 +277,36 @@ fn filter_matches<'a>(
         match_found = false;
 
         // 5) Try to match against the likely subtag without region
+        requested_locale.set_region("").unwrap();
+        if let Some(extended) = add_likely_subtags(requested_locale.to_string().as_ref()) {
+            let requested_locale = Locale::from(extended);
+            available.retain(|key| {
+                if strategy != NegotiationStrategy::Filtering && match_found {
+                    return true;
+                }
+
+                if available_locales
+                    .get(key)
+                    .expect("Available key should be available")
+                    .matches(&requested_locale, true, false)
+                {
+                    supported_locales.push(*key);
+                    match_found = true;
+                    return false;
+                }
+                return true;
+            });
+        }
+
+        if match_found {
+            match strategy {
+                NegotiationStrategy::Filtering => {}
+                NegotiationStrategy::Matching => continue,
+                NegotiationStrategy::Lookup => break,
+            };
+        }
+
+        match_found = false;
 
         // 6) Try to match against a region as a range
         requested_locale.set_region("").unwrap();

@@ -18,5 +18,9 @@
   {
     "input": [["fr-FR"], ["de", "it", "fr-FR"]],
     "output": ["fr-FR"]
+  },
+  {
+    "input": [["fr", "pl", "de-DE"], ["pl", "en-US", "de-DE"]],
+    "output": ["pl", "de-DE"]
   }
 ]
