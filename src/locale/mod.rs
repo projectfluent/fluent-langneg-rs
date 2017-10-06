@@ -109,7 +109,7 @@ impl Locale {
         if let Some(ref language) = self.language {
             return language.as_str();
         }
-        return "";
+        ""
     }
 
     pub fn set_script(&mut self, value: &str) -> parser::Result<()> {
@@ -125,7 +125,7 @@ impl Locale {
         if let Some(ref script) = self.script {
             return script.as_str();
         }
-        return "";
+        ""
     }
 
     pub fn set_region(&mut self, value: &str) -> parser::Result<()> {
@@ -141,7 +141,7 @@ impl Locale {
         if let Some(ref region) = self.region {
             return region.as_str();
         }
-        return "";
+        ""
     }
 
     pub fn add_variant(&mut self, value: String) {
@@ -159,9 +159,10 @@ impl Locale {
     }
 
     pub fn get_variants(&self) -> Vec<&String> {
-        self.variants.as_ref().map_or(Vec::new(), |v| {
-            v.iter().map(|elem| elem).collect()
-        })
+        self.variants.as_ref().map_or(
+            Vec::new(),
+            |v| v.iter().collect(),
+        )
     }
 
     pub fn clear_variants(&mut self) {
@@ -178,7 +179,7 @@ impl Locale {
 
     pub fn add_extension(&mut self, ext_name: String, key: String, value: String) {
         if let Some(ref mut extensions) = self.extensions {
-            let ext = extensions.entry(ext_name).or_insert(BTreeMap::new());
+            let ext = extensions.entry(ext_name).or_insert_with(BTreeMap::new);
             ext.insert(key, value);
         } else {
             let mut exts = BTreeMap::new();
@@ -218,7 +219,7 @@ impl Locale {
             return false;
         }
 
-        return true;
+        true
     }
 }
 
@@ -241,16 +242,16 @@ impl fmt::Display for Locale {
         subtags.push(self.get_language());
 
         if let Some(ref script) = self.script {
-            subtags.push(&script);
+            subtags.push(script);
         }
 
         if let Some(ref region) = self.region {
-            subtags.push(&region);
+            subtags.push(region);
         }
 
         if let Some(ref variants) = self.variants {
             for variant in variants {
-                subtags.push(&variant);
+                subtags.push(variant);
             }
         }
 

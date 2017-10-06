@@ -27,7 +27,7 @@ fn bench_locale(b: &mut Bencher) {
         "de-IT",
     ];
 
-    b.iter(|| for locale in locales.iter() {
+    b.iter(|| for locale in &locales {
         Locale::from(*locale);
     });
 }

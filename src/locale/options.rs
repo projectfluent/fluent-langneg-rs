@@ -27,7 +27,9 @@ pub fn apply_options(loc: &mut Locale, opts: BTreeMap<&str, &str>) {
 
             _ => {
                 if let Some(ref mut exts) = loc.extensions {
-                    let uext = exts.entry("unicode".to_owned()).or_insert(BTreeMap::new());
+                    let uext = exts.entry("unicode".to_owned()).or_insert_with(
+                        BTreeMap::new,
+                    );
                     uext.insert(key.to_owned(), value.to_owned());
                 } else {
                     let mut exts = BTreeMap::new();

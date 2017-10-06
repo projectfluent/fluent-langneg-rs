@@ -57,14 +57,14 @@ impl Display for Error {
     }
 }
 
-pub fn ext_name_for_key<'a>(key: &'a str) -> &'a str {
+pub fn ext_name_for_key(key: &str) -> &str {
     match key {
         "u" => "unicode",
         _ => key,
     }
 }
 
-pub fn ext_key_for_name<'a>(key: &'a str) -> &'a str {
+pub fn ext_key_for_name(key: &str) -> &str {
     match key {
         "unicode" => "u",
         _ => key,
@@ -110,7 +110,7 @@ pub fn parse_language_tag(t: &str) -> Result<Locale> {
         privateuse: vec![],
     };
 
-    if t.len() == 0 {
+    if t.is_empty() {
         return Ok(locale);
     }
 

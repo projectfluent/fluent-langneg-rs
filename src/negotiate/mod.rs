@@ -132,7 +132,7 @@ fn add_likely_subtags(s: &str) -> Option<&str> {
         _ => return None,
     };
 
-    return Some(extended);
+    Some(extended)
 }
 
 fn filter_matches<'a>(
@@ -177,7 +177,7 @@ fn filter_matches<'a>(
                 match_found = true;
                 return false;
             }
-            return true;
+            true
         });
 
         if match_found {
@@ -203,7 +203,7 @@ fn filter_matches<'a>(
                 match_found = true;
                 return false;
             }
-            return true;
+            true
         });
 
         if match_found {
@@ -233,7 +233,7 @@ fn filter_matches<'a>(
                     match_found = true;
                     return false;
                 }
-                return true;
+                true
             });
         }
 
@@ -263,7 +263,7 @@ fn filter_matches<'a>(
                 match_found = true;
                 return false;
             }
-            return true;
+            true
         });
 
         if match_found {
@@ -294,7 +294,7 @@ fn filter_matches<'a>(
                     match_found = true;
                     return false;
                 }
-                return true;
+                true
             });
         }
 
@@ -324,7 +324,7 @@ fn filter_matches<'a>(
                 match_found = true;
                 return false;
             }
-            return true;
+            true
         });
 
         if match_found {
