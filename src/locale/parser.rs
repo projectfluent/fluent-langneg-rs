@@ -1,10 +1,11 @@
 use std::collections::BTreeMap;
 use std::fmt::{self, Display};
 use std::error::Error as ErrorTrait;
+use std::ascii::AsciiExt;
 use super::Locale;
 use super::options;
 
-fn is_alphabetic(s: &str) -> bool {
+fn is_ascii_alphabetic(s: &str) -> bool {
     s.chars().all(
         |x| x >= 'A' && x <= 'Z' || x >= 'a' && x <= 'z',
     )
@@ -72,34 +73,36 @@ pub fn ext_key_for_name(key: &str) -> &str {
 }
 
 pub fn parse_language_subtag(t: &str) -> Result<String> {
-    if t.len() < 2 || t.len() > 3 || !is_alphabetic(t) {
+    if t.len() < 2 || t.len() > 3 || !is_ascii_alphabetic(t) {
         return Err(Error::InvalidLanguage);
     }
 
-    Ok(t.to_lowercase())
+    Ok(t.to_ascii_lowercase())
 }
 
 pub fn parse_script_subtag(t: &str) -> Result<String> {
-    if t.len() != 4 || !is_alphabetic(t) {
+    if t.len() != 4 || !is_ascii_alphabetic(t) {
         return Err(Error::InvalidSubtag);
     }
 
-    let (first, rest) = t.split_at(1);
-
-    let mut s = first.to_uppercase();
-    s.push_str(rest.to_lowercase().as_str());
+    let mut s = t.to_ascii_lowercase();
+    s[0..1].make_ascii_uppercase();
 
     Ok(s)
 }
 
 pub fn parse_region_subtag(t: &str) -> Result<String> {
-    if (t.len() == 2 && is_alphabetic(t)) || (t.len() == 3 && is_numeric(t)) {
-        return Ok(t.to_uppercase());
+    if (t.len() == 2 && is_ascii_alphabetic(t)) || (t.len() == 3 && is_numeric(t)) {
+        return Ok(t.to_ascii_uppercase());
     }
     Err(Error::InvalidSubtag)
 }
 
 pub fn parse_language_tag(t: &str) -> Result<Locale> {
+    if !t.is_ascii() {
+        return Err(Error::InvalidLanguage);
+    }
+
     let mut locale = Locale {
         language: None,
         extlangs: None,
@@ -149,7 +152,7 @@ pub fn parse_language_tag(t: &str) -> Result<Locale> {
             }
             None => {
                 if slen == 1 {
-                    if !is_alphabetic(subtag) {
+                    if !is_ascii_alphabetic(subtag) {
                         return Err(Error::InvalidSubtag);
                     }
                     let ext_name = ext_name_for_key(subtag);
@@ -167,35 +170,38 @@ pub fn parse_language_tag(t: &str) -> Result<Locale> {
                     current_extension = Some(ext_name);
                 } else if position == 0 {
                     // Primary language
-                    if slen < 2 || slen > 3 || !is_alphabetic(subtag) {
+                    if slen < 2 || slen > 3 {
                         return Err(Error::InvalidLanguage);
                     }
-                    locale.set_language(subtag)?;
+                    if locale.set_language(subtag).is_err() {
+                        return Err(Error::InvalidLanguage);
+                    }
                     if slen < 4 {
                         // extlangs are only allowed for short language tags
                         position = 1;
                     } else {
                         position = 2;
                     }
-                } else if position == 1 && slen == 3 && is_alphabetic(subtag) {
+                } else if position == 1 && slen == 3 && is_ascii_alphabetic(subtag) {
                     // extlangs
                     if let Some(ref mut extlangs) = locale.extlangs {
                         extlangs.push(subtag.to_owned());
                     } else {
                         locale.extlangs = Some(vec![subtag.to_owned()]);
                     }
-                } else if position <= 2 && slen == 4 && is_alphabetic(subtag) {
+                } else if position <= 2 && slen == 4 && is_ascii_alphabetic(subtag) {
                     // Script
                     locale.set_script(subtag)?;
                     position = 3;
                 } else if position <= 3 &&
-                           (slen == 2 && is_alphabetic(subtag) || slen == 3 && is_numeric(subtag))
+                           (slen == 2 && is_ascii_alphabetic(subtag) ||
+                                slen == 3 && subtag.is_ascii_digit())
                 {
                     locale.set_region(subtag)?;
                     position = 4;
                 } else if position <= 4 &&
-                           (slen >= 5 && is_alphabetic(&subtag[0..1]) ||
-                                slen >= 4 && is_numeric(&subtag[0..1]))
+                           (slen >= 5 && subtag[0..1].is_ascii_alphabetic() ||
+                                slen >= 4 && subtag[0..1].is_ascii_digit())
                 {
                     // Variant
                     if let Some(ref mut variants) = locale.variants {
