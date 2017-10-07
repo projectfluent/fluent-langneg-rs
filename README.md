@@ -1,6 +1,7 @@
 # Fluent Locale
 
 **Fluent Locale is a library for language tags manipulations and negotiation.**
+[![crates.io](http://meritbadge.herokuapp.com/fluent-locale)](https://crates.io/crates/fluent-locale)
 
 Introduction
 ------------
@@ -116,11 +117,11 @@ so we expect there are some low hanging fruit waiting for someone to find them.
 At the moment performance is comparable to previously mentioned `language-tags` crate
 for parsing a sample list of language tags based on this crate's benchmark code:
 
-```
-running 2 tests
-test bench_locale(fluent-locale)  ... bench:       1,773 ns/iter (+/- 48)
-test bench_locale(language-tags)  ... bench:       1,982 ns/iter (+/- 280)
-```
+
+    running 2 tests
+    test bench_locale(fluent-locale)  ... bench:       1,773 ns/iter (+/- 48)
+    test bench_locale(language-tags) ... bench:       1,982 ns/iter (+/- 280)
+
 
 Develop
 -------
