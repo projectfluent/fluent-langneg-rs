@@ -41,6 +41,8 @@ println!("Extensions: {}", loc.get_extensions());
 
 let loc2 = Locale::from("fr-FR");
 
+loc2.set_region("ca")?;
+
 // The second and third parameters are allow for range matching 
 if loc.matches(loc2, false, false) {
   println!("Locales are matching!");
