@@ -1,7 +1,15 @@
 [package]
-name = "fluent_locale"
+name = "fluent-locale"
+description = """
+A library for parsing, serializing, manipulating and negotiating locales and language tags.
+"""
 version = "0.1.0"
 authors = ["Zibi Braniecki <gandalf@mozilla.com>"]
+homepage = "http://projectfluent.io/"
+license = "Apache-2.0"
+repository = "https://github.com/zbraniecki/fluent-locale-rs"
+readme = "README.md"
+categories = ["intl", "i18n", "l10n", "internationalization", "localization"]
 
 [dependencies]
 
