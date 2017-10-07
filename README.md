@@ -92,7 +92,7 @@ results without any database, but the results can be improved with either limite
 or full [CLDR likely-subtags] database.
 
 The result is a balance chosen for Project Fluent and may differ from other
-implementations of language negotiation algorithms which may chose different
+implementations of language negotiation algorithms which may choose different
 tradeoffs.
 
 [BCP47]: https://tools.ietf.org/html/bcp47
