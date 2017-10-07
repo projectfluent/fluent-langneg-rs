@@ -43,7 +43,7 @@ let loc2 = Locale::new("fr-FR");
 
 loc2.set_region("ca")?;
 
-// The second and third parameters are allow for range matching 
+// The second and third parameters allow for range matching 
 if loc.matches(loc2, false, false) {
   println!("Locales are matching!");
 }
