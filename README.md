@@ -82,9 +82,8 @@ unicode extension keys as defined by [RFC6067][] and Unicode [UTS35][]
 Language negotiation algorithms are custom Project Fluent solutions,
 based on [RFC4647][].
 
-The limitations of the current API is that it does allow for operations
-only on language subtags other than basic (language, script, region, variants) and unicode
-extension keys. Other subtags will be parsed and serialized, but there is no
+The current API only allows for operations on basic language subtags (language, script, region, variants)
+and unicode extension keys. Other subtags will be parsed and serialized, but there is no
 API access to them when operating on the `Locale` object.
 
 The language negotiation strategies aim to replicate the best-effort matches with
