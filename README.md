@@ -39,7 +39,7 @@ println!("Region: {}", loc.get_region());
 println!("Variants: {}", loc.get_variants());
 println!("Extensions: {}", loc.get_extensions());
 
-let loc2 = Locale::from("fr-FR");
+let loc2 = Locale::new("fr-FR");
 
 loc2.set_region("ca")?;
 
@@ -55,6 +55,10 @@ let supported = negotiate_languages(
   fluent_locale::NegotiationStrategy::Filtering
 );
 ```
+
+See [docs.rs][] for more examples.
+
+[docs.rs]: https://docs.rs/fluent-locale/
 
 Status
 ------
