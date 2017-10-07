@@ -113,26 +113,13 @@
 use std::collections::HashMap;
 use super::locale::Locale;
 
+mod likely_subtags;
+
 #[derive(PartialEq, Debug)]
 pub enum NegotiationStrategy {
     Filtering,
     Matching,
     Lookup,
-}
-
-fn add_likely_subtags(s: &str) -> Option<&str> {
-    let extended = match s {
-        "en" => "en-Latn-US",
-        "fr" => "fr-Latn-FR",
-        "sr" => "sr-Cyrl-SR",
-        "sr-RU" => "sr-Latn-RU",
-        "az-IR" => "az-Arab-IR",
-        "zh-GB" => "zh-Hant-GB",
-        "zh-US" => "zh-Hant-US",
-        _ => return None,
-    };
-
-    Some(extended)
 }
 
 fn filter_matches<'a>(
@@ -217,7 +204,7 @@ fn filter_matches<'a>(
         match_found = false;
 
         // 3) Try to match against a maximized version of the requested locale
-        if let Some(extended) = add_likely_subtags(requested_locale.to_string().as_ref()) {
+        if let Some(extended) = likely_subtags::add(requested_locale.to_string().as_ref()) {
             requested_locale = Locale::from(extended);
             available.retain(|key| {
                 if strategy != NegotiationStrategy::Filtering && match_found {
@@ -278,7 +265,7 @@ fn filter_matches<'a>(
 
         // 5) Try to match against the likely subtag without region
         requested_locale.set_region("").unwrap();
-        if let Some(extended) = add_likely_subtags(requested_locale.to_string().as_ref()) {
+        if let Some(extended) = likely_subtags::add(requested_locale.to_string().as_ref()) {
             let requested_locale = Locale::from(extended);
             available.retain(|key| {
                 if strategy != NegotiationStrategy::Filtering && match_found {
