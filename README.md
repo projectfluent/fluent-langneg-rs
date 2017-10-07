@@ -96,6 +96,32 @@ tradeoffs.
 [RFC4647]: https://tools.ietf.org/html/rfc4647
 [CLDR likely-subtags]: http://www.unicode.org/cldr/charts/latest/supplemental/likely_subtags.html
 
+Alternatives
+------------
+
+Although Fluent Locale aims to stay close to W3C Accepted Languages, it does not aim
+to implement the full behavior and some aspects of the language negotiation strategy
+recommended by W3C, such as weights, are not a target right now.
+
+For such purposes, [rust-language-tags][] crate seems to be a better choice.
+
+[rust-language-tags]: https://github.com/pyfisch/rust-language-tags
+
+Performance
+-----------
+
+There has not been a significant performance work being done on the library yet,
+so we expect there are some low hanging fruit waiting for someone to find them.
+
+At the moment performance is comparable to previously mentioned `language-tags` crate
+for parsing a sample list of language tags based on this crate's benchmark code:
+
+```
+running 2 tests
+test bench_locale(fluent-locale)  ... bench:       1,773 ns/iter (+/- 48)
+test bench_locale(language-tags)  ... bench:       1,982 ns/iter (+/- 280)
+```
+
 Develop
 -------
 

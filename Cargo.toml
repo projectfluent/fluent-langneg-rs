@@ -9,7 +9,7 @@ homepage = "http://projectfluent.io/"
 license = "Apache-2.0"
 repository = "https://github.com/zbraniecki/fluent-locale-rs"
 readme = "README.md"
-categories = ["intl", "i18n", "l10n", "internationalization", "localization"]
+categories = ["internationalization", "localization"]
 
 [dependencies]
 
