@@ -28,7 +28,7 @@ fn bench_locale(b: &mut Bencher) {
     ];
 
     b.iter(|| for locale in &locales {
-        Locale::new(*locale, None);
+        let _ = Locale::new(*locale, None);
     });
 }
 
