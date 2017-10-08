@@ -20,7 +20,9 @@
 
 pub mod locale;
 pub mod negotiate;
+pub mod accepted_languages;
 
 pub use locale::Locale;
 pub use negotiate::negotiate_languages;
 pub use negotiate::NegotiationStrategy;
+pub use accepted_languages::parse as parse_accepted_languages;

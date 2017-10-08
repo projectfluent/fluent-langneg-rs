@@ -10,6 +10,7 @@ use std::collections::BTreeMap;
 use self::fluent_locale::locale::Locale;
 use self::fluent_locale::negotiate::negotiate_languages;
 use self::fluent_locale::negotiate::NegotiationStrategy;
+use self::fluent_locale::parse_accepted_languages;
 
 #[macro_use]
 extern crate serde_derive;
@@ -54,10 +55,17 @@ enum NegotiateTestInput {
     NoDefault(Vec<String>, Vec<String>),
     Default(Vec<String>, Vec<String>, String),
 }
+
 #[derive(Serialize, Deserialize)]
 struct NegotiateTestSet {
     input: NegotiateTestInput,
     strategy: Option<String>,
+    output: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct AcceptedLanguagesTestSet {
+    input: String,
     output: Vec<String>,
 }
 
@@ -197,5 +205,16 @@ fn negotiate_matching() {
     for path in paths {
         let p = path.unwrap().path().to_str().unwrap().to_owned();
         test_negotiate_fixtures(p.as_str());
+    }
+}
+
+#[test]
+fn accepted_languages() {
+    let file = File::open("./tests/fixtures/accepted_languages.json").unwrap();
+    let tests: Vec<AcceptedLanguagesTestSet> = serde_json::from_reader(file).unwrap();
+
+    for test in tests {
+        let locales = parse_accepted_languages(test.input.as_str());
+        assert_eq!(test.output, locales);
     }
 }
