@@ -49,8 +49,8 @@ if loc.matches(loc2, false, false) {
 }
 
 let supported = negotiate_languages(
-  vec!["de-DE", "fr-FR", "en-US"],
-  vec!["de-DE", "de-AT", "fr-CA", "fr", "en-GB", "en", "en-US", "it"],
+  &["de-DE", "fr-FR", "en-US"],
+  &["de-DE", "de-AT", "fr-CA", "fr", "en-GB", "en", "en-US", "it"],
   "en-US",
   fluent_locale::NegotiationStrategy::Filtering
 );
