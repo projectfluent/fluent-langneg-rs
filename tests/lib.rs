@@ -143,7 +143,7 @@ fn test_negotiate_fixtures(path: &str) {
                 let requested: Vec<&str> = r.iter().map(|v| v.as_str()).collect();
                 let available: Vec<&str> = a.iter().map(|v| v.as_str()).collect();
                 assert_eq!(
-                    negotiate_languages(requested, available, None, strategy),
+                    negotiate_languages(&requested, &available, None, strategy),
                     test.output,
                     "Test in {} failed",
                     path
@@ -153,7 +153,7 @@ fn test_negotiate_fixtures(path: &str) {
                 let requested: Vec<&str> = r.iter().map(|v| v.as_str()).collect();
                 let available: Vec<&str> = a.iter().map(|v| v.as_str()).collect();
                 assert_eq!(
-                    negotiate_languages(requested, available, Some(default.as_str()), strategy),
+                    negotiate_languages(&requested, &available, Some(default.as_str()), strategy),
                     test.output,
                     "Test in {} failed",
                     path

@@ -11,8 +11,8 @@
 //! let requested = parse_accepted_languages("de-AT;0.9,de-DE;0.8,de;0.7;en-US;0.5");
 //!
 //! let supported = negotiate_languages(
-//!   requested,
-//!   vec!["fr", "pl", "de", "en-US"],
+//!   &requested,
+//!   &["fr", "pl", "de", "en-US"],
 //!   Some("en-US"),
 //!   NegotiationStrategy::Filtering
 //! );

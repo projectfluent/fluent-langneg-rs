@@ -55,8 +55,8 @@ fn bench_negotiate(b: &mut Bencher) {
 
     b.iter(|| {
         negotiate_languages(
-            requested.clone(),
-            available.clone(),
+            &requested,
+            &available,
             None,
             fluent_locale::NegotiationStrategy::Filtering,
         );

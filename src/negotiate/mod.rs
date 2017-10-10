@@ -15,8 +15,8 @@
 //! use fluent_locale::NegotiationStrategy;
 //!
 //! let supported = negotiate_languages(
-//!   vec!["pl", "fr", "en-US"],                 // requested
-//!   vec!["it", "de", "fr", "en-GB", "en-US"],  // available
+//!   &["pl", "fr", "en-US"],                    // requested
+//!   &["it", "de", "fr", "en-GB", "en-US"],     // available
 //!   Some("en-US"),                             // default
 //!   NegotiationStrategy::Filtering             // strategy
 //! );
@@ -123,12 +123,13 @@ pub enum NegotiationStrategy {
 }
 
 fn filter_matches<'a>(
-    requested: Vec<&'a str>,
-    mut available: Vec<&'a str>,
+    requested: &[&'a str],
+    available: &[&'a str],
     strategy: NegotiationStrategy,
 ) -> Vec<&'a str> {
 
     let mut available_locales: HashMap<&str, Locale> = HashMap::new();
+    let mut available = available.to_vec();
 
     available.retain(|tag| match Locale::new(tag, None) {
         Ok(loc) => {
@@ -145,7 +146,7 @@ fn filter_matches<'a>(
             continue;
         }
 
-        let mut requested_locale = Locale::from(req_loc_str);
+        let mut requested_locale = Locale::from(*req_loc_str);
 
         let mut match_found = false;
 
@@ -327,8 +328,8 @@ fn filter_matches<'a>(
 }
 
 pub fn negotiate_languages<'a>(
-    requested: Vec<&'a str>,
-    available: Vec<&'a str>,
+    requested: &[&'a str],
+    available: &[&'a str],
     default: Option<&'a str>,
     strategy: NegotiationStrategy,
 ) -> Vec<&'a str> {
