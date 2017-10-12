@@ -4,7 +4,7 @@
 
 [![crates.io](http://meritbadge.herokuapp.com/fluent-locale)](https://crates.io/crates/fluent-locale)
 [![Build Status](https://travis-ci.org/projectfluent/fluent-locale-rs.svg?branch=master)](https://travis-ci.org/projectfluent/fluent-locale-rs)
-[![Coverage Status](https://coveralls.io/github/projectfluent/fluent-locale-rs/badge.svg)](https://coveralls.io/github/projectfluent/fluent-locale-rs)
+[![Coverage Status](https://coveralls.io/repos/github/projectfluent/fluent-locale-rs/badge.svg?branch=master)](https://coveralls.io/github/projectfluent/fluent-locale-rs?branch=master)
 
 Introduction
 ------------
