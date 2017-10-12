@@ -7,7 +7,7 @@ version = "0.2.0"
 authors = ["Zibi Braniecki <gandalf@mozilla.com>"]
 homepage = "http://projectfluent.io/"
 license = "Apache-2.0"
-repository = "https://github.com/zbraniecki/fluent-locale-rs"
+repository = "https://github.com/projectfluent/fluent-locale-rs"
 readme = "README.md"
 categories = ["internationalization", "localization"]
 
