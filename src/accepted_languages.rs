@@ -14,7 +14,7 @@
 //!   &requested,
 //!   &["fr", "pl", "de", "en-US"],
 //!   Some("en-US"),
-//!   NegotiationStrategy::Filtering
+//!   &NegotiationStrategy::Filtering
 //! );
 //! assert_eq!(supported, vec!["de", "en-US"]);
 //! ```

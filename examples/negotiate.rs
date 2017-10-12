@@ -8,7 +8,7 @@ fn main() {
         &["it", "pl", "ru"],
         &["fr", "en-GB", "en-US", "ru", "pl"],
         None,
-        NegotiationStrategy::Filtering,
+        &NegotiationStrategy::Filtering,
     );
 
     println!("{:?}", supported);

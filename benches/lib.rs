@@ -58,7 +58,7 @@ fn bench_negotiate(b: &mut Bencher) {
             &requested,
             &available,
             None,
-            fluent_locale::NegotiationStrategy::Filtering,
+            &fluent_locale::NegotiationStrategy::Filtering,
         );
     });
 }

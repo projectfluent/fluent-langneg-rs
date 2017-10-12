@@ -18,7 +18,7 @@
 //!   &["pl", "fr", "en-US"],                    // requested
 //!   &["it", "de", "fr", "en-GB", "en-US"],     // available
 //!   Some("en-US"),                             // default
-//!   NegotiationStrategy::Filtering             // strategy
+//!   &NegotiationStrategy::Filtering            // strategy
 //! );
 //! assert_eq!(supported, vec!["fr", "en-US", "en-GB"]);
 //! ```
@@ -125,7 +125,7 @@ pub enum NegotiationStrategy {
 fn filter_matches<'a>(
     requested: &[&'a str],
     available: &[&'a str],
-    strategy: NegotiationStrategy,
+    strategy: &NegotiationStrategy,
 ) -> Vec<&'a str> {
 
     let mut available_locales: HashMap<&str, Locale> = HashMap::new();
@@ -152,7 +152,7 @@ fn filter_matches<'a>(
 
         // 1) Try to find a simple (case-insensitive) string match for the request.
         available.retain(|key| {
-            if strategy != NegotiationStrategy::Filtering && match_found {
+            if strategy != &NegotiationStrategy::Filtering && match_found {
                 return true;
             }
 
@@ -169,16 +169,16 @@ fn filter_matches<'a>(
         });
 
         if match_found {
-            match strategy {
+            match *strategy {
                 NegotiationStrategy::Filtering => {}
                 NegotiationStrategy::Matching => continue,
                 NegotiationStrategy::Lookup => break,
-            };
+            }
         }
 
         // 2) Try to match against the available locales treated as ranges.
         available.retain(|key| {
-            if strategy != NegotiationStrategy::Filtering && match_found {
+            if strategy != &NegotiationStrategy::Filtering && match_found {
                 return true;
             }
 
@@ -195,7 +195,7 @@ fn filter_matches<'a>(
         });
 
         if match_found {
-            match strategy {
+            match *strategy {
                 NegotiationStrategy::Filtering => {}
                 NegotiationStrategy::Matching => continue,
                 NegotiationStrategy::Lookup => break,
@@ -208,7 +208,7 @@ fn filter_matches<'a>(
         if let Some(extended) = likely_subtags::add(requested_locale.to_string().as_ref()) {
             requested_locale = Locale::from(extended);
             available.retain(|key| {
-                if strategy != NegotiationStrategy::Filtering && match_found {
+                if strategy != &NegotiationStrategy::Filtering && match_found {
                     return true;
                 }
 
@@ -226,7 +226,7 @@ fn filter_matches<'a>(
         }
 
         if match_found {
-            match strategy {
+            match *strategy {
                 NegotiationStrategy::Filtering => {}
                 NegotiationStrategy::Matching => continue,
                 NegotiationStrategy::Lookup => break,
@@ -238,7 +238,7 @@ fn filter_matches<'a>(
         // 4) Try to match against a variant as a range
         requested_locale.clear_variants();
         available.retain(|key| {
-            if strategy != NegotiationStrategy::Filtering && match_found {
+            if strategy != &NegotiationStrategy::Filtering && match_found {
                 return true;
             }
 
@@ -255,7 +255,7 @@ fn filter_matches<'a>(
         });
 
         if match_found {
-            match strategy {
+            match *strategy {
                 NegotiationStrategy::Filtering => {}
                 NegotiationStrategy::Matching => continue,
                 NegotiationStrategy::Lookup => break,
@@ -269,7 +269,7 @@ fn filter_matches<'a>(
         if let Some(extended) = likely_subtags::add(requested_locale.to_string().as_ref()) {
             let requested_locale = Locale::from(extended);
             available.retain(|key| {
-                if strategy != NegotiationStrategy::Filtering && match_found {
+                if strategy != &NegotiationStrategy::Filtering && match_found {
                     return true;
                 }
 
@@ -287,7 +287,7 @@ fn filter_matches<'a>(
         }
 
         if match_found {
-            match strategy {
+            match *strategy {
                 NegotiationStrategy::Filtering => {}
                 NegotiationStrategy::Matching => continue,
                 NegotiationStrategy::Lookup => break,
@@ -299,7 +299,7 @@ fn filter_matches<'a>(
         // 6) Try to match against a region as a range
         requested_locale.set_region("").unwrap();
         available.retain(|key| {
-            if strategy != NegotiationStrategy::Filtering && match_found {
+            if strategy != &NegotiationStrategy::Filtering && match_found {
                 return true;
             }
 
@@ -316,7 +316,7 @@ fn filter_matches<'a>(
         });
 
         if match_found {
-            match strategy {
+            match *strategy {
                 NegotiationStrategy::Filtering => {}
                 NegotiationStrategy::Matching => continue,
                 NegotiationStrategy::Lookup => break,
@@ -331,12 +331,16 @@ pub fn negotiate_languages<'a>(
     requested: &[&'a str],
     available: &[&'a str],
     default: Option<&'a str>,
-    strategy: NegotiationStrategy,
+    strategy: &NegotiationStrategy,
 ) -> Vec<&'a str> {
     let mut supported = filter_matches(requested, available, strategy);
 
     if let Some(d) = default {
-        if !supported.contains(&d) {
+        if strategy == &NegotiationStrategy::Lookup {
+            if supported.is_empty() {
+                supported.push(d);
+            }
+        } else if !supported.contains(&d) {
             supported.push(d);
         }
     }
