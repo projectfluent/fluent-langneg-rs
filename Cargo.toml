@@ -11,6 +11,9 @@ repository = "https://github.com/zbraniecki/fluent-locale-rs"
 readme = "README.md"
 categories = ["internationalization", "localization"]
 
+[badges]
+travis-ci = { repository = "projectfluent/fluent-locale-rs" }
+
 [dependencies]
 
 [dev-dependencies]

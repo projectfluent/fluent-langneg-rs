@@ -1,10 +1,20 @@
+sudo: false
 language: rust
 rust:
   - nightly
 cache: cargo
+
+# necessary for `travis-cargo coveralls --no-sudo`
+addons:
+  apt:
+    packages:
+      - libcurl4-openssl-dev
+      - libelf-dev
+      - libdw-dev
+      - binutils-dev # optional: only required for the --verify flag of coveralls
 before_script:
 - |
   pip install 'travis-cargo<0.2' --user &&
   export PATH=$HOME/.local/bin:$PATH
 after_success:
-- travis-cargo coveralls --no-sudo
+- travis-cargo coveralls --no-sudo --verify
