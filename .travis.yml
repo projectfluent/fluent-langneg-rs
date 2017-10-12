@@ -2,3 +2,9 @@ language: rust
 rust:
   - nightly
 cache: cargo
+before_script:
+- |
+  pip install 'travis-cargo<0.2' --user &&
+  export PATH=$HOME/.local/bin:$PATH
+after_success:
+- travis-cargo coveralls --no-sudo
