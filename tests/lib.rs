@@ -217,6 +217,7 @@ fn negotiate_lookup() {
         test_negotiate_fixtures(p.as_str());
     }
 }
+
 #[test]
 fn accepted_languages() {
     let file = File::open("./tests/fixtures/accepted_languages.json").unwrap();
@@ -225,5 +226,15 @@ fn accepted_languages() {
     for test in tests {
         let locales = parse_accepted_languages(test.input.as_str());
         assert_eq!(test.output, locales);
+    }
+}
+
+#[test]
+fn test_locale_parsing_error() {
+    let loc = Locale::new("broken-tag", None);
+    assert_eq!(loc.is_err(), true);
+
+    if let Err(err) = loc {
+        assert_eq!(format!("{}", err), "The given language subtag is invalid");
     }
 }
