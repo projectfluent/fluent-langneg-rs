@@ -1,7 +1,9 @@
 # Fluent Locale
 
 **Fluent Locale is a library for language tags manipulations and negotiation.**
+
 [![crates.io](http://meritbadge.herokuapp.com/fluent-locale)](https://crates.io/crates/fluent-locale)
+[![Build Status](https://travis-ci.org/projectfluent/fluent-locale-rs.svg?branch=master)](https://travis-ci.org/projectfluent/fluent-locale-rs)
 
 Introduction
 ------------
