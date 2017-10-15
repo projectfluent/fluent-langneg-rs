@@ -23,7 +23,7 @@ Installation
 
 ```toml
 [dependencies]
-fluent_locale = "0.2.0"
+fluent_locale = "0.3.0"
 ```
 
 Usage
