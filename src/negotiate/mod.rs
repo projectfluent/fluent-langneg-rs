@@ -127,7 +127,6 @@ fn filter_matches<'a>(
     available: &[&'a str],
     strategy: &NegotiationStrategy,
 ) -> Vec<&'a str> {
-
     let mut available_locales: HashMap<&str, Locale> = HashMap::new();
     let mut available = available.to_vec();
 

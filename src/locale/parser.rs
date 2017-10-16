@@ -6,9 +6,8 @@ use super::Locale;
 use super::options;
 
 fn is_ascii_alphabetic(s: &str) -> bool {
-    s.chars().all(
-        |x| x >= 'A' && x <= 'Z' || x >= 'a' && x <= 'z',
-    )
+    s.chars()
+        .all(|x| x >= 'A' && x <= 'Z' || x >= 'a' && x <= 'z')
 }
 
 fn is_numeric(s: &str) -> bool {
@@ -130,26 +129,21 @@ pub fn parse_language_tag(t: &str) -> Result<Locale> {
         }
 
         match current_extension {
-            Some(ext) => {
-                if ext == "x" {
-                    locale.privateuse.push(subtag.to_owned());
-                } else {
-                    match ext_key {
-                        Some(key) => {
-                            if let Some(ref mut exts) = locale.extensions {
-                                exts.get_mut(ext).expect("no entry found for key").insert(
-                                    key.to_owned(),
-                                    subtag.to_owned(),
-                                );
-                                ext_key = None;
-                            }
-                        }
-                        None => {
-                            ext_key = Some(options::option_name_for_key(subtag));
-                        }
+            Some(ext) => if ext == "x" {
+                locale.privateuse.push(subtag.to_owned());
+            } else {
+                match ext_key {
+                    Some(key) => if let Some(ref mut exts) = locale.extensions {
+                        exts.get_mut(ext)
+                            .expect("no entry found for key")
+                            .insert(key.to_owned(), subtag.to_owned());
+                        ext_key = None;
+                    },
+                    None => {
+                        ext_key = Some(options::option_name_for_key(subtag));
                     }
                 }
-            }
+            },
             None => {
                 if slen == 1 {
                     if !is_ascii_alphabetic(subtag) {
@@ -193,15 +187,15 @@ pub fn parse_language_tag(t: &str) -> Result<Locale> {
                     // Script
                     locale.set_script(subtag)?;
                     position = 3;
-                } else if position <= 3 &&
-                           (slen == 2 && is_ascii_alphabetic(subtag) ||
-                                slen == 3 && subtag.is_ascii_digit())
+                } else if position <= 3
+                    && (slen == 2 && is_ascii_alphabetic(subtag)
+                        || slen == 3 && subtag.is_ascii_digit())
                 {
                     locale.set_region(subtag)?;
                     position = 4;
-                } else if position <= 4 &&
-                           (slen >= 5 && subtag[0..1].is_ascii_alphabetic() ||
-                                slen >= 4 && subtag[0..1].is_ascii_digit())
+                } else if position <= 4
+                    && (slen >= 5 && subtag[0..1].is_ascii_alphabetic()
+                        || slen >= 4 && subtag[0..1].is_ascii_digit())
                 {
                     // Variant
                     if let Some(ref mut variants) = locale.variants {

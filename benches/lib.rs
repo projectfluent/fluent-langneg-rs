@@ -1,7 +1,7 @@
 #![feature(test)]
 
-extern crate test;
 extern crate fluent_locale;
+extern crate test;
 
 use test::Bencher;
 use fluent_locale::Locale;

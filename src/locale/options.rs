@@ -25,20 +25,17 @@ pub fn apply_options(loc: &mut Locale, opts: BTreeMap<&str, &str>) {
             "script" => loc.script = Some(value.to_owned()),
             "region" => loc.region = Some(value.to_owned()),
 
-            _ => {
-                if let Some(ref mut exts) = loc.extensions {
-                    let uext = exts.entry("unicode".to_owned()).or_insert_with(
-                        BTreeMap::new,
-                    );
-                    uext.insert(key.to_owned(), value.to_owned());
-                } else {
-                    let mut exts = BTreeMap::new();
-                    let mut uext = BTreeMap::new();
-                    uext.insert(key.to_owned(), value.to_owned());
-                    exts.insert("unicode".to_owned(), uext);
-                    loc.extensions = Some(exts);
-                }
-            }
+            _ => if let Some(ref mut exts) = loc.extensions {
+                let uext = exts.entry("unicode".to_owned())
+                    .or_insert_with(BTreeMap::new);
+                uext.insert(key.to_owned(), value.to_owned());
+            } else {
+                let mut exts = BTreeMap::new();
+                let mut uext = BTreeMap::new();
+                uext.insert(key.to_owned(), value.to_owned());
+                exts.insert("unicode".to_owned(), uext);
+                loc.extensions = Some(exts);
+            },
         }
     }
 }
