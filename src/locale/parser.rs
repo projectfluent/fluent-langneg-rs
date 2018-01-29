@@ -1,7 +1,6 @@
 use std::collections::BTreeMap;
 use std::fmt::{self, Display};
 use std::error::Error as ErrorTrait;
-use std::ascii::AsciiExt;
 use super::Locale;
 use super::options;
 
@@ -10,7 +9,7 @@ fn is_ascii_alphabetic(s: &str) -> bool {
         .all(|x| x >= 'A' && x <= 'Z' || x >= 'a' && x <= 'z')
 }
 
-fn is_numeric(s: &str) -> bool {
+fn is_ascii_digit(s: &str) -> bool {
     s.chars().all(|x| x >= '0' && x <= '9')
 }
 
@@ -91,7 +90,7 @@ pub fn parse_script_subtag(t: &str) -> Result<String> {
 }
 
 pub fn parse_region_subtag(t: &str) -> Result<String> {
-    if (t.len() == 2 && is_ascii_alphabetic(t)) || (t.len() == 3 && is_numeric(t)) {
+    if (t.len() == 2 && is_ascii_alphabetic(t)) || (t.len() == 3 && is_ascii_digit(t)) {
         return Ok(t.to_ascii_uppercase());
     }
     Err(Error::InvalidSubtag)
@@ -189,13 +188,13 @@ pub fn parse_language_tag(t: &str) -> Result<Locale> {
                     position = 3;
                 } else if position <= 3
                     && (slen == 2 && is_ascii_alphabetic(subtag)
-                        || slen == 3 && subtag.is_ascii_digit())
+                        || slen == 3 && is_ascii_digit(subtag))
                 {
                     locale.set_region(subtag)?;
                     position = 4;
                 } else if position <= 4
-                    && (slen >= 5 && subtag[0..1].is_ascii_alphabetic()
-                        || slen >= 4 && subtag[0..1].is_ascii_digit())
+                    && (slen >= 5 && is_ascii_alphabetic(&subtag[0..1])
+                        || slen >= 4 && is_ascii_digit(&subtag[0..1]))
                 {
                     // Variant
                     if let Some(ref mut variants) = locale.variants {

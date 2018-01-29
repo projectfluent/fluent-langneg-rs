@@ -1,6 +1,3 @@
-#![feature(vec_remove_item)]
-#![feature(ascii_ctype)]
-
 //! fluent-locale is an API for operating on locales and language tags.
 //! It's part of Project Fluent, a localization framework designed to unleash
 //! the expressive power of the natural language.

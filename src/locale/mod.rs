@@ -154,7 +154,9 @@ impl Locale {
 
     pub fn remove_variant(&mut self, value: String) {
         if let Some(ref mut variants) = self.variants {
-            variants.remove_item(&value);
+            if let Some(position) = variants.iter().position(|x| *x == *value) {
+                variants.remove(position);
+            }
         }
     }
 
