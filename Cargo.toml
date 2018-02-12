@@ -3,13 +3,13 @@ name = "fluent-locale"
 description = """
 A library for parsing, serializing, manipulating and negotiating locales and language tags.
 """
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Zibi Braniecki <gandalf@mozilla.com>"]
-homepage = "http://projectfluent.io/"
+homepage = "http://projectfluent.org/"
 license = "Apache-2.0"
 repository = "https://github.com/projectfluent/fluent-locale-rs"
 readme = "README.md"
-categories = ["internationalization", "localization"]
+categories = ["internationalization", "localization", "l10n", "intl", "i18n", "language", "negotiation", "locale"]
 
 [badges]
 travis-ci = { repository = "projectfluent/fluent-locale-rs" }
