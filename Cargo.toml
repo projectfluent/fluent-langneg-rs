@@ -9,7 +9,7 @@ homepage = "http://projectfluent.org/"
 license = "Apache-2.0"
 repository = "https://github.com/projectfluent/fluent-locale-rs"
 readme = "README.md"
-categories = ["internationalization", "localization", "l10n", "intl", "i18n"]
+categories = ["internationalization", "localization"]
 
 [badges]
 travis-ci = { repository = "projectfluent/fluent-locale-rs" }
