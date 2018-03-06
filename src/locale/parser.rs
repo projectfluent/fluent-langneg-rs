@@ -4,15 +4,6 @@ use std::error::Error as ErrorTrait;
 use super::Locale;
 use super::options;
 
-fn is_ascii_alphabetic(s: &str) -> bool {
-    s.chars()
-        .all(|x| x >= 'A' && x <= 'Z' || x >= 'a' && x <= 'z')
-}
-
-fn is_ascii_digit(s: &str) -> bool {
-    s.chars().all(|x| x >= '0' && x <= '9')
-}
-
 pub type Result<T> = ::std::result::Result<T, Error>;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -71,7 +62,7 @@ pub fn ext_key_for_name(key: &str) -> &str {
 }
 
 pub fn parse_language_subtag(t: &str) -> Result<String> {
-    if t.len() < 2 || t.len() > 3 || !is_ascii_alphabetic(t) {
+    if t.len() < 2 || t.len() > 3 || t.chars().any(|c| !c.is_ascii_alphabetic()) {
         return Err(Error::InvalidLanguage);
     }
 
@@ -79,7 +70,7 @@ pub fn parse_language_subtag(t: &str) -> Result<String> {
 }
 
 pub fn parse_script_subtag(t: &str) -> Result<String> {
-    if t.len() != 4 || !is_ascii_alphabetic(t) {
+    if t.len() != 4 || t.chars().any(|c| !c.is_ascii_alphabetic()) {
         return Err(Error::InvalidSubtag);
     }
 
@@ -90,7 +81,9 @@ pub fn parse_script_subtag(t: &str) -> Result<String> {
 }
 
 pub fn parse_region_subtag(t: &str) -> Result<String> {
-    if (t.len() == 2 && is_ascii_alphabetic(t)) || (t.len() == 3 && is_ascii_digit(t)) {
+    if (t.len() == 2 && t.chars().all(|c| c.is_ascii_alphabetic()))
+        || (t.len() == 3 && t.chars().all(|c| c.is_ascii_digit()))
+    {
         return Ok(t.to_ascii_uppercase());
     }
     Err(Error::InvalidSubtag)
@@ -145,7 +138,7 @@ pub fn parse_language_tag(t: &str) -> Result<Locale> {
             },
             None => {
                 if slen == 1 {
-                    if !is_ascii_alphabetic(subtag) {
+                    if subtag.chars().any(|c| !c.is_ascii_alphabetic()) {
                         return Err(Error::InvalidSubtag);
                     }
                     let ext_name = ext_name_for_key(subtag);
@@ -175,26 +168,30 @@ pub fn parse_language_tag(t: &str) -> Result<Locale> {
                     } else {
                         position = 2;
                     }
-                } else if position == 1 && slen == 3 && is_ascii_alphabetic(subtag) {
+                } else if position == 1 && slen == 3
+                    && subtag.chars().all(|c| c.is_ascii_alphabetic())
+                {
                     // extlangs
                     if let Some(ref mut extlangs) = locale.extlangs {
                         extlangs.push(subtag.to_owned());
                     } else {
                         locale.extlangs = Some(vec![subtag.to_owned()]);
                     }
-                } else if position <= 2 && slen == 4 && is_ascii_alphabetic(subtag) {
+                } else if position <= 2 && slen == 4
+                    && subtag.chars().all(|c| c.is_ascii_alphabetic())
+                {
                     // Script
                     locale.set_script(subtag)?;
                     position = 3;
                 } else if position <= 3
-                    && (slen == 2 && is_ascii_alphabetic(subtag)
-                        || slen == 3 && is_ascii_digit(subtag))
+                    && (slen == 2 && subtag.chars().all(|c| c.is_ascii_alphabetic())
+                        || slen == 3 && subtag.chars().all(|c| c.is_ascii_digit()))
                 {
                     locale.set_region(subtag)?;
                     position = 4;
                 } else if position <= 4
-                    && (slen >= 5 && is_ascii_alphabetic(&subtag[0..1])
-                        || slen >= 4 && is_ascii_digit(&subtag[0..1]))
+                    && (slen >= 5 && subtag[0..1].chars().all(|c| c.is_ascii_alphabetic())
+                        || slen >= 4 && subtag[0..1].chars().all(|c| c.is_ascii_digit()))
                 {
                     // Variant
                     if let Some(ref mut variants) = locale.variants {
