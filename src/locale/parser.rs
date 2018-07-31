@@ -1,8 +1,8 @@
-use std::collections::BTreeMap;
-use std::fmt::{self, Display};
-use std::error::Error as ErrorTrait;
-use super::Locale;
 use super::options;
+use super::Locale;
+use std::collections::BTreeMap;
+use std::error::Error as ErrorTrait;
+use std::fmt::{self, Display};
 
 pub type Result<T> = ::std::result::Result<T, Error>;
 
@@ -168,7 +168,8 @@ pub fn parse_language_tag(t: &str) -> Result<Locale> {
                     } else {
                         position = 2;
                     }
-                } else if position == 1 && slen == 3
+                } else if position == 1
+                    && slen == 3
                     && subtag.chars().all(|c| c.is_ascii_alphabetic())
                 {
                     // extlangs
@@ -177,7 +178,8 @@ pub fn parse_language_tag(t: &str) -> Result<Locale> {
                     } else {
                         locale.extlangs = Some(vec![subtag.to_owned()]);
                     }
-                } else if position <= 2 && slen == 4
+                } else if position <= 2
+                    && slen == 4
                     && subtag.chars().all(|c| c.is_ascii_alphabetic())
                 {
                     // Script

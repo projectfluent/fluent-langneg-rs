@@ -1,5 +1,5 @@
-use std::collections::BTreeMap;
 use super::Locale;
+use std::collections::BTreeMap;
 
 pub fn option_name_for_key(key: &str) -> &'static str {
     match key {
@@ -17,7 +17,6 @@ pub fn option_key_for_name(key: &str) -> &'static str {
     }
 }
 
-
 pub fn apply_options(loc: &mut Locale, opts: BTreeMap<&str, &str>) {
     for (key, value) in opts {
         match key {
@@ -26,7 +25,8 @@ pub fn apply_options(loc: &mut Locale, opts: BTreeMap<&str, &str>) {
             "region" => loc.region = Some(value.to_owned()),
 
             _ => if let Some(ref mut exts) = loc.extensions {
-                let uext = exts.entry("unicode".to_owned())
+                let uext = exts
+                    .entry("unicode".to_owned())
                     .or_insert_with(BTreeMap::new);
                 uext.insert(key.to_owned(), value.to_owned());
             } else {

@@ -13,5 +13,10 @@
     "input": [["en", "de"], ["en-GB", "en-US", "de"], "it"],
     "strategy": "lookup",
     "output": ["en-US"]
+  },
+  {
+    "input": [["x-testing"], ["en-GB", "en-US", "de"], "it"],
+    "strategy": "lookup",
+    "output": ["it"]
   }
 ]

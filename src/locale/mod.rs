@@ -1,8 +1,8 @@
-use std::fmt;
 use std::collections::BTreeMap;
+use std::fmt;
 
-mod parser;
 mod options;
+mod parser;
 
 /// A Locale object.
 ///
@@ -170,6 +170,10 @@ impl Locale {
         self.variants = None;
     }
 
+    pub fn has_privateuse(&self) -> bool {
+        !self.privateuse.is_empty()
+    }
+
     pub fn get_extensions(&self) -> BTreeMap<String, &BTreeMap<String, String>> {
         self.extensions.as_ref().map_or(BTreeMap::new(), |map| {
             map.iter()
@@ -192,6 +196,10 @@ impl Locale {
     }
 
     pub fn matches(&self, other: &Locale, available_range: bool, requested_range: bool) -> bool {
+        if !self.privateuse.is_empty() || other.has_privateuse() {
+            return false;
+        }
+
         if (!available_range || !self.language.is_none())
             && (!requested_range || !other.get_language().is_empty())
             && self.get_language() != other.get_language()

@@ -1,21 +1,7 @@
 use locale::Locale;
 
 static REGION_MATCHING_KEYS: &[&str] = &[
-    "az",
-    "bg",
-    "cs",
-    "de",
-    "es",
-    "fi",
-    "fr",
-    "hu",
-    "it",
-    "lt",
-    "lv",
-    "nl",
-    "pl",
-    "ro",
-    "ru",
+    "az", "bg", "cs", "de", "es", "fi", "fr", "hu", "it", "lt", "lv", "nl", "pl", "ro", "ru",
 ];
 
 pub fn add(loc: &str) -> Option<String> {

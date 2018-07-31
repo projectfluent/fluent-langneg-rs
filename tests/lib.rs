@@ -1,11 +1,11 @@
 extern crate fluent_locale;
 extern crate serde_json;
 
-use std::error::Error;
-use std::fs::File;
-use std::fs;
-use std::path::Path;
 use std::collections::BTreeMap;
+use std::error::Error;
+use std::fs;
+use std::fs::File;
+use std::path::Path;
 
 use self::fluent_locale::locale::Locale;
 use self::fluent_locale::negotiate::negotiate_languages;

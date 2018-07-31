@@ -110,8 +110,8 @@
 //! ```
 //!
 
-use std::collections::HashMap;
 use super::locale::Locale;
+use std::collections::HashMap;
 
 mod likely_subtags;
 

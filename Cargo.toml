@@ -13,6 +13,9 @@ categories = ["internationalization", "localization"]
 
 [badges]
 travis-ci = { repository = "projectfluent/fluent-locale-rs" }
+coveralls = { repository = "projectfluent/fluent-locale-rs", branch = "master", service = "github" }
+
+maintenance = { status = "actively-developed" }
 
 [dependencies]
 

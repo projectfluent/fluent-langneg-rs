@@ -1,7 +1,7 @@
 extern crate fluent_locale;
 
-use std::collections::BTreeMap;
 use fluent_locale::Locale;
+use std::collections::BTreeMap;
 
 fn main() {
     let locale = Locale::from("en-US");
@@ -14,16 +14,12 @@ fn main() {
     println!("region: {:?}", locale.get_region());
     println!("======\n\n");
 
-
-
     let mut locale = Locale::from("de-DE");
     locale.set_region("AT").unwrap();
 
     println!("======");
     println!("Locale: {}", locale);
     println!("======\n\n");
-
-
 
     let mut options = BTreeMap::new();
     options.insert("hour-cycle", "h12");
