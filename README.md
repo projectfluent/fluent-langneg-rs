@@ -18,14 +18,6 @@ On top of that, it allows for simple operations like comparing `Locale` objects 
 negotiating between lists of language tags.
 
 
-Installation
-------------
-
-```toml
-[dependencies]
-fluent_locale = "0.3.0"
-```
-
 Usage
 -----
 
