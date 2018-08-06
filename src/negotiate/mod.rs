@@ -326,9 +326,9 @@ fn filter_matches<'a>(
     supported_locales
 }
 
-pub fn negotiate_languages<'a, T: AsRef<str>>(
-    requested: &'a [T],
-    available: &'a [T],
+pub fn negotiate_languages<'a, R: AsRef<str>, A: AsRef<str>>(
+    requested: &'a [R],
+    available: &'a [A],
     default: Option<&'a str>,
     strategy: &NegotiationStrategy,
 ) -> Vec<&'a str> {
