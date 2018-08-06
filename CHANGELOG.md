@@ -4,6 +4,10 @@
 
   - …
 
+## fluent-locale 0.4.0 (August 6, 2018)
+
+  - Ergonomics improvement - `negotiate_languages` now accepts &[&str], &[String], Vec<&str> and Vec<string>
+
 ## fluent-locale 0.3.2 (July 31, 2018)
 
   - Make Locale::matches reject matches if privateuse is not empty
