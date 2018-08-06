@@ -4,6 +4,10 @@
 
   - …
 
+## fluent-locale 0.4.1 (August 6, 2018)
+
+  - Separate out requested from available to allow for different mixes of Vec and &[].
+
 ## fluent-locale 0.4.0 (August 6, 2018)
 
   - Ergonomics improvement - `negotiate_languages` now accepts &[&str], &[String], Vec<&str> and Vec<string>

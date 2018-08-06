@@ -3,7 +3,7 @@ name = "fluent-locale"
 description = """
 A library for parsing, serializing, manipulating and negotiating locales and language tags.
 """
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Zibi Braniecki <gandalf@mozilla.com>"]
 homepage = "http://projectfluent.org/"
 license = "Apache-2.0"
