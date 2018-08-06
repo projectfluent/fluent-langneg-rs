@@ -326,13 +326,17 @@ fn filter_matches<'a>(
     supported_locales
 }
 
-pub fn negotiate_languages<'a>(
-    requested: &[&'a str],
-    available: &[&'a str],
+pub fn negotiate_languages<'a, T: AsRef<str>>(
+    requested: &'a [T],
+    available: &'a [T],
     default: Option<&'a str>,
     strategy: &NegotiationStrategy,
 ) -> Vec<&'a str> {
-    let mut supported = filter_matches(requested, available, strategy);
+    let mut supported = filter_matches(
+        &requested.into_iter().map(AsRef::as_ref).collect::<Vec<_>>(),
+        &available.into_iter().map(AsRef::as_ref).collect::<Vec<_>>(),
+        strategy,
+    );
 
     if let Some(d) = default {
         if strategy == &NegotiationStrategy::Lookup {

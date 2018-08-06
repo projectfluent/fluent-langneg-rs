@@ -138,6 +138,7 @@ fn test_negotiate_fixtures(path: &str) {
         };
         match test.input {
             NegotiateTestInput::NoDefault(r, a) => {
+                // One with &str
                 let requested: Vec<&str> = r.iter().map(|v| v.as_str()).collect();
                 let available: Vec<&str> = a.iter().map(|v| v.as_str()).collect();
                 assert_eq!(
@@ -147,9 +148,8 @@ fn test_negotiate_fixtures(path: &str) {
                     path
                 );
             }
-            NegotiateTestInput::Default(r, a, default) => {
-                let requested: Vec<&str> = r.iter().map(|v| v.as_str()).collect();
-                let available: Vec<&str> = a.iter().map(|v| v.as_str()).collect();
+            NegotiateTestInput::Default(requested, available, default) => {
+                // One with String
                 assert_eq!(
                     negotiate_languages(&requested, &available, Some(default.as_str()), &strategy),
                     test.output,
