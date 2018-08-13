@@ -152,7 +152,7 @@ impl Locale {
         }
     }
 
-    pub fn remove_variant(&mut self, value: String) {
+    pub fn remove_variant(&mut self, value: &str) {
         if let Some(ref mut variants) = self.variants {
             if let Some(position) = variants.iter().position(|x| *x == *value) {
                 variants.remove(position);
@@ -200,28 +200,28 @@ impl Locale {
             return false;
         }
 
-        if (!available_range || !self.language.is_none())
+        if (!available_range || self.language.is_some())
             && (!requested_range || !other.get_language().is_empty())
             && self.get_language() != other.get_language()
         {
             return false;
         }
 
-        if (!available_range || !self.script.is_none())
+        if (!available_range || self.script.is_some())
             && (!requested_range || !other.get_script().is_empty())
             && self.get_script() != other.get_script()
         {
             return false;
         }
 
-        if (!available_range || !self.region.is_none())
+        if (!available_range || self.region.is_some())
             && (!requested_range || !other.get_region().is_empty())
             && self.get_region() != other.get_region()
         {
             return false;
         }
 
-        if (!available_range || !self.variants.is_none())
+        if (!available_range || self.variants.is_some())
             && (!requested_range || !other.get_variants().is_empty())
             && self.get_variants() != other.get_variants()
         {
