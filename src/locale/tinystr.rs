@@ -46,6 +46,51 @@ impl TinyStr8 {
             Ok(TinyStr8(NonZeroU64::new_unchecked(word)))
         }
     }
+
+    /// Dereference to string slice.
+    #[inline]
+    pub fn as_str(&self) -> &str {
+        self.deref()
+    }
+
+    pub fn to_ascii_uppercase(self) -> TinyStr8 {
+        let word = self.0.get();
+        let result = word &
+        !(
+            (
+                (word + 0x1f1f1f1f_1f1f1f1f) &
+                !(word + 0x05050505_05050505) &
+                0x80808080_80808080
+            ) >> 2
+        );
+        unsafe { TinyStr8(NonZeroU64::new_unchecked(result)) }
+    }
+
+    pub fn to_ascii_lowercase(self) -> TinyStr8 {
+        let word = self.0.get();
+        let result = word |
+        (
+            (
+                (word + 0x3f3f3f3f_3f3f3f3f) &
+                !(word + 0x25252525_25252525) &
+                0x80808080_80808080
+            ) >> 2
+        );
+        unsafe { TinyStr8(NonZeroU64::new_unchecked(result)) }
+    }
+
+    /// Determine whether string is all ASCII alphabetical characters.
+    pub fn is_all_ascii_alpha(self) -> bool {
+        let word = self.0.get();
+        let mask = (word + 0x7f7f7f7f_7f7f7f7f) & 0x80808080_80808080;
+        let lower = word | 0x20202020_20202020;
+        (
+            (
+                !(lower + 0x1f1f1f1f_1f1f1f1f) |
+                (lower + 0x05050505_05050505)
+            ) & mask
+        ) == 0
+    }
 }
 
 impl Deref for TinyStr8 {
@@ -104,6 +149,38 @@ impl TinyStr4 {
                 _ => Err(Error::InvalidSize),
             }
         }
+    }
+
+    /// Dereference to string slice.
+    #[inline]
+    pub fn as_str(&self) -> &str {
+        self.deref()
+    }
+
+    pub fn to_ascii_uppercase(self) -> TinyStr4 {
+        let word = self.0.get();
+        let result = word &
+        !(
+            (
+                (word + 0x1f1f1f1f) &
+                !(word + 0x05050505) &
+                0x80808080
+            ) >> 2
+        );
+        unsafe { TinyStr4(NonZeroU32::new_unchecked(result)) }
+    }
+
+    pub fn to_ascii_lowercase(self) -> TinyStr4 {
+        let word = self.0.get();
+        let result = word |
+        (
+            (
+                (word + 0x3f3f3f3f) &
+                !(word + 0x25252525) &
+                0x80808080
+            ) >> 2
+        );
+        unsafe { TinyStr4(NonZeroU32::new_unchecked(result)) }
     }
 }
 
@@ -193,5 +270,15 @@ mod tests {
     #[test]
     fn tiny8_nonascii() {
         assert_eq!(TinyStr8::new("\u{4000}"), Err(Error::NonAscii));
+    }
+
+    #[test]
+    fn tiny8_alpha() {
+        let s = TinyStr8::new("@abcXYZ[").unwrap();
+        assert!(!s.is_all_ascii_alpha());
+        assert_eq!(s.to_ascii_uppercase().as_str(), "@ABCXYZ[");
+        assert_eq!(s.to_ascii_lowercase().as_str(), "@abcxyz[");
+
+        assert!(TinyStr8::new("abcXYZ").unwrap().is_all_ascii_alpha());
     }
 }

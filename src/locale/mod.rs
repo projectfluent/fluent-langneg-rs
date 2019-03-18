@@ -5,6 +5,8 @@ mod options;
 mod parser;
 mod tinystr;
 
+use self::tinystr::{TinyStr4, TinyStr8};
+
 /// A Locale object.
 ///
 /// Locale object stores information encoded in a language tag and provides
@@ -77,7 +79,7 @@ mod tinystr;
 /// ```
 #[derive(Debug, Default, PartialEq, Clone)]
 pub struct Locale {
-    language: Option<String>,
+    language: Option<TinyStr8>,
     extlangs: Option<Vec<String>>,
     script: Option<String>,
     region: Option<String>,

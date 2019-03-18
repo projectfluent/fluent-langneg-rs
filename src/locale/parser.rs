@@ -1,4 +1,5 @@
 use super::options;
+use super::TinyStr8;
 use super::Locale;
 use std::collections::BTreeMap;
 use std::error::Error as ErrorTrait;
@@ -61,12 +62,13 @@ pub fn ext_key_for_name(key: &str) -> &str {
     }
 }
 
-pub fn parse_language_subtag(t: &str) -> Result<String> {
-    if t.len() < 2 || t.len() > 3 || t.chars().any(|c| !c.is_ascii_alphabetic()) {
+pub fn parse_language_subtag(t: &str) -> Result<TinyStr8> {
+    let s = TinyStr8::new(t).map_err(|_| Error::InvalidLanguage)?;
+    if t.len() < 2 || t.len() > 3 || !s.is_all_ascii_alpha() {
         return Err(Error::InvalidLanguage);
     }
 
-    Ok(t.to_ascii_lowercase())
+    Ok(s.to_ascii_lowercase())
 }
 
 pub fn parse_script_subtag(t: &str) -> Result<String> {
