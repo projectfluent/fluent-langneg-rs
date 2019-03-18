@@ -1,0 +1,197 @@
+//! A small ASCII-only bounded length string representation.
+
+use std::fmt;
+use std::num::{NonZeroU32, NonZeroU64};
+use std::ops::Deref;
+use std::ptr::copy_nonoverlapping;
+
+#[derive(PartialEq, Eq, Debug)]
+pub enum Error {
+    InvalidSize,
+    InvalidNull,
+    NonAscii,
+}
+
+/// A tiny string that is from 1 to 8 non-NUL ASCII characters.
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+pub struct TinyStr8(NonZeroU64);
+
+/// A tiny string that is from 1 to 4 non-NUL ASCII characters.
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+pub struct TinyStr4(NonZeroU32);
+
+impl TinyStr8 {
+    /// Create a new tiny string.
+    ///
+    /// Returns an error result if the string is not 1 to 8 characters in length,
+    /// contains non-ASCII, or contains an embedded NUL byte.
+    pub fn new(text: &str) -> Result<TinyStr8, Error> {
+        let len = text.len();
+        if len < 1 || len > 8 {
+            return Err(Error::InvalidSize);
+        }
+        unsafe {
+            let mut word: u64 = 0;
+            copy_nonoverlapping(text.as_ptr(), &mut word as *mut u64 as *mut u8, len);
+            let mask = 0x80808080_80808080u64 >> (8 * (8 - len));
+            // TODO: could do this with #cfg(target_endian), but this is clearer and
+            // more confidence-inspiring.
+            let mask = mask.to_le();
+            if (word & mask) != 0 {
+                return Err(Error::NonAscii);
+            }
+            if ((mask - word) & mask) != 0 {
+                return Err(Error::InvalidNull);
+            }
+            Ok(TinyStr8(NonZeroU64::new_unchecked(word)))
+        }
+    }
+}
+
+impl Deref for TinyStr8 {
+    type Target = str;
+
+    #[inline]
+    fn deref(&self) -> &str {
+        // Again, could use #cfg to hand-roll a big-endian implementation.
+        let word = self.0.get().to_le();
+        let len = (8 - word.leading_zeros() / 8) as usize;
+        unsafe {
+            let slice = core::slice::from_raw_parts(&self.0 as *const _ as *const u8, len);
+            std::str::from_utf8_unchecked(slice)
+        }
+    }
+}
+
+impl fmt::Display for TinyStr8 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.deref())
+    }
+}
+
+impl fmt::Debug for TinyStr8 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self.deref())
+    }
+}
+
+unsafe fn make_4byte_str(text: &str, len: usize, mask: u32) -> Result<NonZeroU32, Error> {
+    // Mask is always supplied as little-endian.
+    let mask = mask.to_le();
+    let mut word: u32 = 0;
+    copy_nonoverlapping(text.as_ptr(), &mut word as *mut u32 as *mut u8, len);
+    if (word & mask) != 0 {
+        return Err(Error::NonAscii);
+    }
+    if ((mask - word) & mask) != 0 {
+        return Err(Error::InvalidNull);
+    }
+    Ok(NonZeroU32::new_unchecked(word))
+}
+
+impl TinyStr4 {
+    /// Create a new tiny string.
+    ///
+    /// Returns an error result if the string is not 1 to 4 characters in length,
+    /// contains non-ASCII, or contains an embedded NUL byte.
+    pub fn new(text: &str) -> Result<TinyStr4, Error> {
+        unsafe {
+            match text.len() {
+                1 => make_4byte_str(text, 1, 0x80).map(TinyStr4),
+                2 => make_4byte_str(text, 2, 0x8080).map(TinyStr4),
+                3 => make_4byte_str(text, 3, 0x808080).map(TinyStr4),
+                4 => make_4byte_str(text, 4, 0x80808080).map(TinyStr4),
+                _ => Err(Error::InvalidSize),
+            }
+        }
+    }
+}
+
+impl Deref for TinyStr4 {
+    type Target = str;
+
+    #[inline]
+    fn deref(&self) -> &str {
+        // Again, could use #cfg to hand-roll a big-endian implementation.
+        let word = self.0.get().to_le();
+        let len = (4 - word.leading_zeros() / 8) as usize;
+        unsafe {
+            let slice = core::slice::from_raw_parts(&self.0 as *const _ as *const u8, len);
+            std::str::from_utf8_unchecked(slice)
+        }
+    }
+}
+
+impl fmt::Display for TinyStr4 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.deref())
+    }
+}
+
+impl fmt::Debug for TinyStr4 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self.deref())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Error, TinyStr4, TinyStr8};
+    use std::ops::Deref;
+
+    #[test]
+    fn tiny4_basic() {
+        let s = TinyStr4::new("abc").unwrap();
+        assert_eq!(s.deref(), "abc");
+    }
+
+    #[test]
+    fn tiny4_size() {
+        assert_eq!(TinyStr4::new(""), Err(Error::InvalidSize));
+        assert!(TinyStr4::new("1").is_ok());
+        assert!(TinyStr4::new("12").is_ok());
+        assert!(TinyStr4::new("123").is_ok());
+        assert!(TinyStr4::new("1234").is_ok());
+        assert_eq!(TinyStr4::new("12345"), Err(Error::InvalidSize));
+        assert_eq!(TinyStr4::new("123456789"), Err(Error::InvalidSize));
+    }
+
+    #[test]
+    fn tiny4_null() {
+        assert_eq!(TinyStr4::new("a\u{0}b"), Err(Error::InvalidNull));
+    }
+
+    #[test]
+    fn tiny4_nonascii() {
+        assert_eq!(TinyStr4::new("\u{4000}"), Err(Error::NonAscii));
+    }
+    #[test]
+    fn tiny8_basic() {
+        let s = TinyStr8::new("abcde").unwrap();
+        assert_eq!(s.deref(), "abcde");
+    }
+
+    #[test]
+    fn tiny8_size() {
+        assert_eq!(TinyStr8::new(""), Err(Error::InvalidSize));
+        assert!(TinyStr8::new("1").is_ok());
+        assert!(TinyStr8::new("12").is_ok());
+        assert!(TinyStr8::new("123").is_ok());
+        assert!(TinyStr8::new("1234").is_ok());
+        assert!(TinyStr8::new("12345").is_ok());
+        assert!(TinyStr8::new("123456").is_ok());
+        assert!(TinyStr8::new("1234567").is_ok());
+        assert!(TinyStr8::new("12345678").is_ok());
+        assert_eq!(TinyStr8::new("123456789"), Err(Error::InvalidSize));
+    }
+
+    #[test]
+    fn tiny8_null() {
+        assert_eq!(TinyStr8::new("a\u{0}b"), Err(Error::InvalidNull));
+    }
+
+    #[test]
+    fn tiny8_nonascii() {
+        assert_eq!(TinyStr8::new("\u{4000}"), Err(Error::NonAscii));
+    }
+}

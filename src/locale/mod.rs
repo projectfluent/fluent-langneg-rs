@@ -3,6 +3,7 @@ use std::fmt;
 
 mod options;
 mod parser;
+mod tinystr;
 
 /// A Locale object.
 ///
