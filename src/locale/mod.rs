@@ -79,10 +79,10 @@ use self::tinystr::{TinyStr4, TinyStr8};
 /// ```
 #[derive(Debug, Default, PartialEq, Clone)]
 pub struct Locale {
-    language: Option<TinyStr8>,
+    language: Option<TinyStr4>,
     extlangs: Option<Vec<String>>,
-    script: Option<String>,
-    region: Option<String>,
+    script: Option<TinyStr4>,
+    region: Option<TinyStr4>,
     variants: Option<Vec<String>>,
     extensions: Option<BTreeMap<String, BTreeMap<String, String>>>,
     privateuse: Vec<String>,

@@ -1,4 +1,4 @@
-use super::{Locale, TinyStr8};
+use super::{Locale, TinyStr4};
 use std::collections::BTreeMap;
 
 pub fn option_name_for_key(key: &str) -> &'static str {
@@ -20,9 +20,11 @@ pub fn option_key_for_name(key: &str) -> &'static str {
 pub fn apply_options(loc: &mut Locale, opts: BTreeMap<&str, &str>) {
     for (key, value) in opts {
         match key {
-            "language" => loc.language = TinyStr8::new(value).ok(),
-            "script" => loc.script = Some(value.to_owned()),
-            "region" => loc.region = Some(value.to_owned()),
+            // TODO: should we do something other than store None on strings
+            // that fail representation?
+            "language" => loc.language = TinyStr4::new(value).ok(),
+            "script" => loc.script = TinyStr4::new(value).ok(),
+            "region" => loc.region = TinyStr4::new(value).ok(),
 
             _ => if let Some(ref mut exts) = loc.extensions {
                 let uext = exts

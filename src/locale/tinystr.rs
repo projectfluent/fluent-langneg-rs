@@ -182,6 +182,32 @@ impl TinyStr4 {
         );
         unsafe { TinyStr4(NonZeroU32::new_unchecked(result)) }
     }
+
+    /// Makes the string all lowercase except for the first character,
+    /// which is made uppercase.
+    pub fn to_ascii_titlecase(self) -> TinyStr4 {
+        let word = self.0.get().to_le();
+        let mask = (
+            (word + 0x3f3f3f1f) &
+            !(word + 0x25252505) &
+            0x80808080
+        ) >> 2;
+        let result = (word | mask) & !(0x20 & mask);
+        unsafe { TinyStr4(NonZeroU32::new_unchecked(result.to_le())) }
+    }
+
+    /// Determine whether string is all ASCII alphabetical characters.
+    pub fn is_all_ascii_alpha(self) -> bool {
+        let word = self.0.get();
+        let mask = (word + 0x7f7f7f7f) & 0x80808080;
+        let lower = word | 0x20202020;
+        (
+            (
+                !(lower + 0x1f1f1f1f) |
+                (lower + 0x05050505)
+            ) & mask
+        ) == 0
+    }
 }
 
 impl Deref for TinyStr4 {
@@ -242,6 +268,26 @@ mod tests {
     fn tiny4_nonascii() {
         assert_eq!(TinyStr4::new("\u{4000}"), Err(Error::NonAscii));
     }
+
+    #[test]
+    fn tiny4_alpha() {
+        let s = TinyStr4::new("@aZ[").unwrap();
+        assert!(!s.is_all_ascii_alpha());
+        assert_eq!(s.to_ascii_uppercase().as_str(), "@AZ[");
+        assert_eq!(s.to_ascii_lowercase().as_str(), "@az[");
+
+        assert!(TinyStr4::new("abYZ").unwrap().is_all_ascii_alpha());
+    }
+
+    #[test]
+    fn tiny4_titlecase() {
+        assert_eq!(TinyStr4::new("abcd").unwrap().to_ascii_titlecase().as_str(), "Abcd");
+        assert_eq!(TinyStr4::new("ABCD").unwrap().to_ascii_titlecase().as_str(), "Abcd");
+        assert_eq!(TinyStr4::new("aBCD").unwrap().to_ascii_titlecase().as_str(), "Abcd");
+        assert_eq!(TinyStr4::new("A123").unwrap().to_ascii_titlecase().as_str(), "A123");
+        assert_eq!(TinyStr4::new("123a").unwrap().to_ascii_titlecase().as_str(), "123a");
+    }
+
     #[test]
     fn tiny8_basic() {
         let s = TinyStr8::new("abcde").unwrap();

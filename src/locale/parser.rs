@@ -1,5 +1,5 @@
 use super::options;
-use super::TinyStr8;
+use super::TinyStr4;
 use super::Locale;
 use std::collections::BTreeMap;
 use std::error::Error as ErrorTrait;
@@ -62,8 +62,8 @@ pub fn ext_key_for_name(key: &str) -> &str {
     }
 }
 
-pub fn parse_language_subtag(t: &str) -> Result<TinyStr8> {
-    let s = TinyStr8::new(t).map_err(|_| Error::InvalidLanguage)?;
+pub fn parse_language_subtag(t: &str) -> Result<TinyStr4> {
+    let s = TinyStr4::new(t).map_err(|_| Error::InvalidLanguage)?;
     if t.len() < 2 || t.len() > 3 || !s.is_all_ascii_alpha() {
         return Err(Error::InvalidLanguage);
     }
@@ -71,24 +71,33 @@ pub fn parse_language_subtag(t: &str) -> Result<TinyStr8> {
     Ok(s.to_ascii_lowercase())
 }
 
-pub fn parse_script_subtag(t: &str) -> Result<String> {
-    if t.len() != 4 || t.chars().any(|c| !c.is_ascii_alphabetic()) {
+pub fn parse_script_subtag(t: &str) -> Result<TinyStr4> {
+    let s = TinyStr4::new(t).map_err(|_| Error::InvalidSubtag)?;
+    if t.len() != 4 || !s.is_all_ascii_alpha() {
         return Err(Error::InvalidSubtag);
     }
 
-    let mut s = t.to_ascii_lowercase();
-    s[0..1].make_ascii_uppercase();
-
-    Ok(s)
+    Ok(s.to_ascii_titlecase())
 }
 
-pub fn parse_region_subtag(t: &str) -> Result<String> {
-    if (t.len() == 2 && t.chars().all(|c| c.is_ascii_alphabetic()))
-        || (t.len() == 3 && t.chars().all(|c| c.is_ascii_digit()))
-    {
-        return Ok(t.to_ascii_uppercase());
+pub fn parse_region_subtag(t: &str) -> Result<TinyStr4> {
+    match t.len() {
+        2 => {
+            let s = TinyStr4::new(t).map_err(|_| Error::InvalidSubtag)?;
+            if !s.is_all_ascii_alpha() {
+                return Err(Error::InvalidSubtag);
+            }
+            Ok(s.to_ascii_uppercase())
+        }
+        3 => {
+            if !t.chars().all(|c| c.is_ascii_digit()) {
+                return Err(Error::InvalidSubtag);
+            }
+            // This actually can't fail.
+            TinyStr4::new(t).map_err(|_| Error::InvalidSubtag)
+        }
+        _ => Err(Error::InvalidSubtag),
     }
-    Err(Error::InvalidSubtag)
 }
 
 pub fn parse_language_tag(t: &str) -> Result<Locale> {
