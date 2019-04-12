@@ -17,6 +17,9 @@ coveralls = { repository = "projectfluent/fluent-locale-rs", branch = "master", 
 
 maintenance = { status = "actively-developed" }
 
+[features]
+likely-subtags = []
+
 [dependencies]
 
 [dev-dependencies]

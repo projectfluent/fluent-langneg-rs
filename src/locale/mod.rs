@@ -4,6 +4,9 @@ use std::fmt;
 mod options;
 mod parser;
 
+#[cfg(feature = "likely-subtags")]
+mod likely_subtags;
+
 /// A Locale object.
 ///
 /// Locale object stores information encoded in a language tag and provides
