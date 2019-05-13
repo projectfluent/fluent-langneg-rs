@@ -1,4 +1,4 @@
-use locale::Locale;
+use unic_locale::Locale;
 
 static REGION_MATCHING_KEYS: &[&str] = &[
     "az", "bg", "cs", "de", "es", "fi", "fr", "hu", "it", "lt", "lv", "nl", "pl", "ro", "ru",
@@ -14,12 +14,12 @@ pub fn add(loc: &str) -> Option<String> {
         "zh-GB" => "zh-Hant-GB",
         "zh-US" => "zh-Hant-US",
         _ => {
-            let mut locale = Locale::from(loc);
-            let lang = String::from(locale.get_language());
+            let mut locale = Locale::from_str(loc).unwrap();
+            let lang = locale.get_language().to_owned();
 
             for subtag in REGION_MATCHING_KEYS {
                 if lang.as_str() == *subtag {
-                    locale.set_region(subtag).unwrap();
+                    locale.set_region(Some(subtag)).unwrap();
                     let loc = locale.to_string();
                     return Some(loc);
                 }

@@ -110,7 +110,7 @@
 //! ```
 //!
 
-use super::locale::Locale;
+use unic_locale::Locale;
 use std::collections::HashMap;
 
 mod likely_subtags;
@@ -130,7 +130,7 @@ fn filter_matches<'a>(
     let mut available_locales: HashMap<&str, Locale> = HashMap::new();
     let mut available = available.to_vec();
 
-    available.retain(|tag| match Locale::new(tag, None) {
+    available.retain(|tag| match Locale::from_str(tag) {
         Ok(loc) => {
             available_locales.insert(tag, loc);
             true
@@ -145,7 +145,7 @@ fn filter_matches<'a>(
             continue;
         }
 
-        let mut requested_locale = Locale::from(*req_loc_str);
+        let mut requested_locale = Locale::from_str(*req_loc_str).unwrap();
 
         let mut match_found = false;
 
@@ -205,7 +205,7 @@ fn filter_matches<'a>(
 
         // 3) Try to match against a maximized version of the requested locale
         if let Some(extended) = likely_subtags::add(requested_locale.to_string().as_ref()) {
-            requested_locale = Locale::from(extended);
+            requested_locale = Locale::from_str(&extended).unwrap();
             available.retain(|key| {
                 if strategy != &NegotiationStrategy::Filtering && match_found {
                     return true;
@@ -235,7 +235,7 @@ fn filter_matches<'a>(
         match_found = false;
 
         // 4) Try to match against a variant as a range
-        requested_locale.clear_variants();
+        requested_locale.set_variants(&[]).unwrap();
         available.retain(|key| {
             if strategy != &NegotiationStrategy::Filtering && match_found {
                 return true;
@@ -264,9 +264,9 @@ fn filter_matches<'a>(
         match_found = false;
 
         // 5) Try to match against the likely subtag without region
-        requested_locale.set_region("").unwrap();
+        requested_locale.set_region(None).unwrap();
         if let Some(extended) = likely_subtags::add(requested_locale.to_string().as_ref()) {
-            let requested_locale = Locale::from(extended);
+            let requested_locale = Locale::from_str(&extended).unwrap();
             available.retain(|key| {
                 if strategy != &NegotiationStrategy::Filtering && match_found {
                     return true;
@@ -296,7 +296,7 @@ fn filter_matches<'a>(
         match_found = false;
 
         // 6) Try to match against a region as a range
-        requested_locale.set_region("").unwrap();
+        requested_locale.set_region(None).unwrap();
         available.retain(|key| {
             if strategy != &NegotiationStrategy::Filtering && match_found {
                 return true;

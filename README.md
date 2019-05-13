@@ -11,8 +11,8 @@ Introduction
 
 This is a Rust implementation of fluent-locale library which is a part of Project Fluent.
 
-The library allows for parsing language tags into `Locale` objects, operating on them
-and serializing the result back to language tag strings.
+The library allows for parsing of unicode locale identifiers into `Locale` objects, operating on them
+and serializing the result back to locale identifier strings.
 
 On top of that, it allows for simple operations like comparing `Locale` objects and
 negotiating between lists of language tags.
@@ -67,11 +67,17 @@ add more tests and ensure that bad input is correctly handled.
 Compatibility
 -------------
 
-The API is based on [BCP47][] definition of Language Tags and is aiming to
-parse and serialize all language tags according to that definition.
+The API is based on [UTS 35][] definition of [Unicode Locale Identifier][] and is aiming to
+parse and serialize all locale identifiers according to that definition.
 
-Parsed language tags are stored as `Locale` objects compatible with
-ECMA402's [Intl.Locale][] and allow for operations on language tag subtags and
+*Note*: Unicode Locale Identifier is similar, but different, from what [BCP47][] specifies under
+the name Language Tag.
+For most locale management and negotiation needs, the Unicode Locale Identifier used in this crate is likely a better choice,
+but in some case, like HTTP Accepted Headers, you may need the complete BCP47 Language Tag implementation which
+this crate does not provide.
+
+Parsed locale identifiers are stored as `Locale` objects compatible with
+ECMA402's [Intl.Locale][] and allow for operations on locale identifier subtags and
 unicode extension keys as defined by [RFC6067][] and Unicode [UTS35][]
 
 Language negotiation algorithms are custom Project Fluent solutions,
@@ -84,7 +90,7 @@ API access to them when operating on the `Locale` object.
 The language negotiation strategies aim to replicate the best-effort matches with
 the most limited amount of data. The algorithm returns reasonable
 results without any database, but the results can be improved with either limited
-or full [CLDR likely-subtags] database.
+or full [CLDR likely-subtags][] database.
 
 The result is a balance chosen for Project Fluent and may differ from other
 implementations of language negotiation algorithms which may choose different

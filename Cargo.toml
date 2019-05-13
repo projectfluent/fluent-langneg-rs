@@ -10,6 +10,7 @@ license = "Apache-2.0"
 repository = "https://github.com/projectfluent/fluent-locale-rs"
 readme = "README.md"
 categories = ["internationalization", "localization"]
+edition = "2018"
 
 [badges]
 travis-ci = { repository = "projectfluent/fluent-locale-rs" }
@@ -18,6 +19,7 @@ coveralls = { repository = "projectfluent/fluent-locale-rs", branch = "master", 
 maintenance = { status = "actively-developed" }
 
 [dependencies]
+unic-locale = { path = "../unic-locale" }
 
 [dev-dependencies]
 serde = "1.0"

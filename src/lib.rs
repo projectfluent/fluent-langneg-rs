@@ -16,10 +16,8 @@
 //! language tags and for language negotiation.
 
 pub mod accepted_languages;
-pub mod locale;
 pub mod negotiate;
 
 pub use accepted_languages::parse as parse_accepted_languages;
-pub use locale::Locale;
 pub use negotiate::negotiate_languages;
 pub use negotiate::NegotiationStrategy;

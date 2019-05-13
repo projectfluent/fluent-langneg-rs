@@ -4,7 +4,7 @@ extern crate fluent_locale;
 extern crate test;
 
 use fluent_locale::negotiate_languages;
-use fluent_locale::Locale;
+use unic_locale::Locale;
 use test::Bencher;
 
 #[bench]
@@ -16,7 +16,7 @@ fn bench_locale(b: &mut Bencher) {
 
     b.iter(|| {
         for locale in &locales {
-            let _ = Locale::new(*locale, None);
+            let _ = Locale::from_str(*locale);
         }
     });
 }

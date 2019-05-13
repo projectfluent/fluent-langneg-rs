@@ -15,7 +15,7 @@
     "output": ["en-US"]
   },
   {
-    "input": [["x-testing"], ["en-GB", "en-US", "de"], "it"],
+    "input": [["und-x-testing"], ["en-GB", "en-US", "de"], "it"],
     "strategy": "lookup",
     "output": ["it"]
   }
