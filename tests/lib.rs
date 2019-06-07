@@ -1,10 +1,10 @@
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
 use std::fs::File;
 use std::path::Path;
 
-use unic_locale::Locale;
+use unic_locale::{Locale, ExtensionType};
 use fluent_locale::negotiate::negotiate_languages;
 use fluent_locale::negotiate::NegotiationStrategy;
 use fluent_locale::parse_accepted_languages;
@@ -15,7 +15,7 @@ extern crate serde_derive;
 #[derive(Serialize, Deserialize)]
 struct LocaleTestInputData {
     string: String,
-    options: Option<BTreeMap<String, String>>,
+    options: Option<HashMap<String, String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -24,7 +24,7 @@ struct LocaleTestOutputObject {
     script: Option<String>,
     region: Option<String>,
     variants: Option<Vec<String>>,
-    extensions: Option<BTreeMap<String, BTreeMap<String, String>>>,
+    extensions: Option<HashMap<String, HashMap<String, String>>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -80,7 +80,7 @@ fn test_locale_fixtures(path: &str) {
 
         let loc;
         if let Some(opts) = test.input.options {
-            let borrowed: BTreeMap<&str, &str> =
+            let borrowed: HashMap<&str, &str> =
                 opts.iter().map(|(k, v)| (k.as_str(), v.as_str())).collect();
             loc = Locale::from_str_with_options(&s, borrowed).unwrap();
         } else {
@@ -101,12 +101,16 @@ fn test_locale_fixtures(path: &str) {
                 }
                 if let Some(variants) = o.variants {
                     ref_locale.set_variants(
-                        &variants.iter().map(String::as_str).collect::<Vec<&str>>());
+                        &variants.iter().map(String::as_str).collect::<Vec<&str>>()).unwrap();
                 }
                 if let Some(extensions) = o.extensions {
                     for (ext_name, values) in extensions {
+                        let ext = match ext_name.as_str() {
+                            "unicode" => ExtensionType::Unicode,
+                            _ => unimplemented!()
+                        };
                         for (key, val) in values {
-                            ref_locale.set_extension(&ext_name, &key, &val);
+                            ref_locale.set_extension(ext, &key, &val).unwrap();
                         }
                     }
                 }
@@ -231,6 +235,6 @@ fn test_locale_parsing_error() {
     assert_eq!(loc.is_err(), true);
 
     if let Err(err) = loc {
-        assert_eq!(format!("{}", err), "The given language subtag is invalid");
+        assert_eq!(format!("{}", err), "Language Identifier Parser Error");
     }
 }
