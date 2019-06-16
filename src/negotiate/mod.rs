@@ -333,8 +333,8 @@ pub fn negotiate_languages<'a, R: AsRef<str>, A: AsRef<str>>(
     strategy: &NegotiationStrategy,
 ) -> Vec<&'a str> {
     let mut supported = filter_matches(
-        &requested.into_iter().map(AsRef::as_ref).collect::<Vec<_>>(),
-        &available.into_iter().map(AsRef::as_ref).collect::<Vec<_>>(),
+        &requested.iter().map(AsRef::as_ref).collect::<Vec<_>>(),
+        &available.iter().map(AsRef::as_ref).collect::<Vec<_>>(),
         strategy,
     );
 

@@ -1,5 +1,3 @@
-extern crate fluent_locale;
-
 use fluent_locale::negotiate::NegotiationStrategy;
 use fluent_locale::negotiate_languages;
 

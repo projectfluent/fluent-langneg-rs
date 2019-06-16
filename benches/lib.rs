@@ -1,6 +1,5 @@
 #![feature(test)]
 
-extern crate fluent_locale;
 extern crate test;
 
 use fluent_locale::negotiate_languages;

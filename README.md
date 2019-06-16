@@ -1,6 +1,6 @@
 # Fluent Locale
 
-**Fluent Locale is a library for language tags manipulations and negotiation.**
+**Fluent Locale is a library for language and locale identifier negotiation.**
 
 [![crates.io](http://meritbadge.herokuapp.com/fluent-locale)](https://crates.io/crates/fluent-locale)
 [![Build Status](https://travis-ci.org/projectfluent/fluent-locale-rs.svg?branch=master)](https://travis-ci.org/projectfluent/fluent-locale-rs)
@@ -11,43 +11,21 @@ Introduction
 
 This is a Rust implementation of fluent-locale library which is a part of Project Fluent.
 
-The library allows for parsing of unicode locale identifiers into `Locale` objects, operating on them
-and serializing the result back to locale identifier strings.
-
-On top of that, it allows for simple operations like comparing `Locale` objects and
-negotiating between lists of language tags.
-
+The library uses [unic-langid](https://github.com/zbraniecki/unic-locale) and [unic-locale](https://github.com/zbraniecki/unic-locale) to retrieve and operate on Unicde Language and Locale Identifiers.
+The library provides algorithm for negotiating between lists of locales.
 
 Usage
 -----
 
 ```rust
-extern crate fluent_locale;
-
-use fluent_locale::Locale;
+use fluent_locale::negotiate::NegotiationStrategy;
 use fluent_locale::negotiate_languages;
-
-let loc = Locale::from("fr-CA");
-println!("Language: {}", loc.get_language());
-println!("Script: {}", loc.get_script());
-println!("Region: {}", loc.get_region());
-println!("Variants: {}", loc.get_variants());
-println!("Extensions: {}", loc.get_extensions());
-
-let loc2 = Locale::new("fr-FR");
-
-loc2.set_region("ca")?;
-
-// The second and third parameters allow for range matching 
-if loc.matches(loc2, false, false) {
-  println!("Locales are matching!");
-}
 
 let supported = negotiate_languages(
   &["de-DE", "fr-FR", "en-US"],
   &["de-DE", "de-AT", "fr-CA", "fr", "en-GB", "en", "en-US", "it"],
-  "en-US",
-  fluent_locale::NegotiationStrategy::Filtering
+  Some("en-US"),
+  &NegotiationStrategy::Filtering
 );
 ```
 

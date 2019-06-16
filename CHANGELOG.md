@@ -4,6 +4,12 @@
 
   - …
 
+## fluent-locale 0.5.0 (June 16, 2019)
+
+  - Separate out `unic-langid` and `unic-locale` into new crates.
+  - Switch from BCP47 conformance to Unicode Locale Identifier.
+  - Update to Rust 2018.
+
 ## fluent-locale 0.4.1 (August 6, 2018)
 
   - Separate out requested from available to allow for different mixes of Vec and &[].
