@@ -4,27 +4,41 @@
 //! # Example:
 //!
 //! ```
+//! use std::convert::TryFrom;
+//!
 //! use fluent_locale::negotiate_languages;
 //! use fluent_locale::NegotiationStrategy;
 //! use fluent_locale::parse_accepted_languages;
+//! use fluent_locale::convert_vec_str_to_langids;
+//! use unic_langid::LanguageIdentifier;
 //!
 //! let requested = parse_accepted_languages("de-AT;0.9,de-DE;0.8,de;0.7;en-US;0.5");
+//! let available = convert_vec_str_to_langids(&["fr", "pl", "de", "en-US"]);
+//! let default = LanguageIdentifier::try_from("en-US").expect("Failed to parse a langid.");
 //!
 //! let supported = negotiate_languages(
 //!   &requested,
-//!   &["fr", "pl", "de", "en-US"],
-//!   Some("en-US"),
-//!   &NegotiationStrategy::Filtering
+//!   &available,
+//!   Some(&default),
+//!   NegotiationStrategy::Filtering
 //! );
-//! assert_eq!(supported, vec!["de", "en-US"]);
+//!
+//! let expected = convert_vec_str_to_langids(&["de", "en-US"]);
+//! assert_eq!(supported,
+//!            expected.iter().map(|t| t.as_ref()).collect::<Vec<&LanguageIdentifier>>());
 //! ```
 //!
 //! This function ignores the weights associated with the locales, since Fluent Locale
 //! language negotiation only uses the order of locales, not the weights.
 //!
-pub fn parse(s: &str) -> Vec<&str> {
+
+use std::convert::TryFrom;
+use unic_langid::LanguageIdentifier;
+
+pub fn parse(s: &str) -> Vec<LanguageIdentifier> {
     s.split(',')
         .map(|t| t.trim().split(';').nth(0).unwrap())
         .filter(|t| !t.is_empty())
+        .filter_map(|t| LanguageIdentifier::try_from(t).ok())
         .collect()
 }

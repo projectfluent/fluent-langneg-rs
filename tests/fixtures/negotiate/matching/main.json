@@ -7,6 +7,6 @@
   {
     "input": [["und"], ["fr", "de", "it", "ru", "pl"]],
     "strategy": "matching",
-    "output": ["fr"]
+    "output": []
   }
 ]

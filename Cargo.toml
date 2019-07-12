@@ -19,7 +19,7 @@ coveralls = { repository = "projectfluent/fluent-locale-rs", branch = "master", 
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-unic-locale = "^0.1"
+unic-langid = { path = "../../unic-locale/unic-langid" }
 
 [dev-dependencies]
 serde = "^1.0"

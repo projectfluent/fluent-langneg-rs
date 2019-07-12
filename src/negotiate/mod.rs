@@ -11,16 +11,27 @@
 //! # Example:
 //!
 //! ```
+//! use std::convert::TryFrom;
+//! 
 //! use fluent_locale::negotiate_languages;
 //! use fluent_locale::NegotiationStrategy;
+//! use fluent_locale::convert_vec_str_to_langids;
+//! use unic_langid::LanguageIdentifier;
+//!
+//! let requested = convert_vec_str_to_langids(&["pl", "fr", "en-US"]);
+//! let available = convert_vec_str_to_langids(&["it", "de", "fr", "en-GB", "en_US"]);
+//! let default = LanguageIdentifier::try_from("en-US").expect("Parsing langid failed.");
 //!
 //! let supported = negotiate_languages(
-//!   &["pl", "fr", "en-US"],                    // requested
-//!   &["it", "de", "fr", "en-GB", "en-US"],     // available
-//!   Some("en-US"),                             // default
-//!   &NegotiationStrategy::Filtering            // strategy
+//!   &requested,
+//!   &available,
+//!   Some(&default),
+//!   NegotiationStrategy::Filtering
 //! );
-//! assert_eq!(supported, vec!["fr", "en-US", "en-GB"]);
+//!
+//! let expected = convert_vec_str_to_langids(&["fr", "en-US", "en-GB"]);
+//! assert_eq!(supported,
+//!            expected.iter().map(|t| t.as_ref()).collect::<Vec<&LanguageIdentifier>>());
 //! ```
 //!
 //! # The exact algorithm is custom, and consists of a 6 level strategy:
@@ -110,91 +121,86 @@
 //! ```
 //!
 
-use unic_locale::Locale;
 use std::collections::HashMap;
+use std::convert::TryInto;
+use unic_langid::LanguageIdentifier;
 
 mod likely_subtags;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub enum NegotiationStrategy {
     Filtering,
     Matching,
     Lookup,
 }
 
-fn filter_matches<'a>(
-    requested: &[&'a str],
-    available: &[&'a str],
-    strategy: &NegotiationStrategy,
-) -> Vec<&'a str> {
-    let mut available_locales: HashMap<&str, Locale> = HashMap::new();
-    let mut available = available.to_vec();
-
-    available.retain(|tag| match Locale::from_str(tag) {
-        Ok(loc) => {
-            available_locales.insert(tag, loc);
-            true
-        }
-        Err(_) => false,
-    });
-
+pub fn filter_matches<
+    'a,
+    R: 'a + Into<LanguageIdentifier> + PartialEq + Clone,
+    A: 'a + Into<LanguageIdentifier> + PartialEq + Clone,
+>(
+    requested: impl IntoIterator<Item = &'a R>,
+    available: impl IntoIterator<Item = &'a A>,
+    strategy: NegotiationStrategy,
+) -> Vec<&'a A> {
     let mut supported_locales = vec![];
 
-    for req_loc_str in requested {
-        if req_loc_str.is_empty() {
+    let mut av_map: HashMap<LanguageIdentifier, &'a A> = HashMap::new();
+
+    for av in available.into_iter() {
+        av_map.insert(av.clone().into(), av);
+    }
+
+    let req_langids: Vec<LanguageIdentifier> =
+        requested.into_iter().map(|a| a.clone().into()).collect();
+
+    for mut req in req_langids {
+        if req.get_language() == "und" {
             continue;
         }
-
-        let mut requested_locale = Locale::from_str(*req_loc_str).unwrap();
 
         let mut match_found = false;
 
         // 1) Try to find a simple (case-insensitive) string match for the request.
-        available.retain(|key| {
-            if strategy != &NegotiationStrategy::Filtering && match_found {
+        av_map.retain(|key, value| {
+            if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
 
-            if available_locales
-                .get(key)
-                .expect("Available key should be available")
-                .matches(&requested_locale, false, false)
-            {
-                supported_locales.push(*key);
+            if key.matches(&req, false, false) {
                 match_found = true;
+                supported_locales.push(*value);
                 return false;
             }
             true
         });
 
         if match_found {
-            match *strategy {
+            match strategy {
                 NegotiationStrategy::Filtering => {}
                 NegotiationStrategy::Matching => continue,
                 NegotiationStrategy::Lookup => break,
             }
         }
 
+        match_found = false;
+
         // 2) Try to match against the available locales treated as ranges.
-        available.retain(|key| {
-            if strategy != &NegotiationStrategy::Filtering && match_found {
+        av_map.retain(|key, value| {
+            if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
 
-            if available_locales
-                .get(key)
-                .expect("Available key should be available")
-                .matches(&requested_locale, true, false)
-            {
-                supported_locales.push(*key);
+            if key.matches(&req, true, false) {
                 match_found = true;
+                supported_locales.push(*value);
                 return false;
             }
             true
         });
 
         if match_found {
-            match *strategy {
+            match strategy {
                 NegotiationStrategy::Filtering => {}
                 NegotiationStrategy::Matching => continue,
                 NegotiationStrategy::Lookup => break,
@@ -204,57 +210,48 @@ fn filter_matches<'a>(
         match_found = false;
 
         // 3) Try to match against a maximized version of the requested locale
-        if let Some(extended) = likely_subtags::add(requested_locale.to_string().as_ref()) {
-            requested_locale = Locale::from_str(&extended).unwrap();
-            available.retain(|key| {
-                if strategy != &NegotiationStrategy::Filtering && match_found {
+        if let Some(req) = likely_subtags::add(&req) {
+            av_map.retain(|key, value| {
+                if strategy != NegotiationStrategy::Filtering && match_found {
                     return true;
                 }
 
-                if available_locales
-                    .get(key)
-                    .expect("Available key should be available")
-                    .matches(&requested_locale, true, false)
-                {
-                    supported_locales.push(*key);
+                if key.matches(&req, true, false) {
                     match_found = true;
+                    supported_locales.push(*value);
                     return false;
                 }
                 true
             });
-        }
 
-        if match_found {
-            match *strategy {
-                NegotiationStrategy::Filtering => {}
-                NegotiationStrategy::Matching => continue,
-                NegotiationStrategy::Lookup => break,
-            };
-        }
+            if match_found {
+                match strategy {
+                    NegotiationStrategy::Filtering => {}
+                    NegotiationStrategy::Matching => continue,
+                    NegotiationStrategy::Lookup => break,
+                };
+            }
 
-        match_found = false;
+            match_found = false;
+        }
 
         // 4) Try to match against a variant as a range
-        requested_locale.set_variants(&[]).unwrap();
-        available.retain(|key| {
-            if strategy != &NegotiationStrategy::Filtering && match_found {
+        req.set_variants(&[]).unwrap();
+        av_map.retain(|key, value| {
+            if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
 
-            if available_locales
-                .get(key)
-                .expect("Available key should be available")
-                .matches(&requested_locale, true, true)
-            {
-                supported_locales.push(*key);
+            if key.matches(&req, true, true) {
                 match_found = true;
+                supported_locales.push(*value);
                 return false;
             }
             true
         });
 
         if match_found {
-            match *strategy {
+            match strategy {
                 NegotiationStrategy::Filtering => {}
                 NegotiationStrategy::Matching => continue,
                 NegotiationStrategy::Lookup => break,
@@ -264,58 +261,49 @@ fn filter_matches<'a>(
         match_found = false;
 
         // 5) Try to match against the likely subtag without region
-        requested_locale.set_region(None).unwrap();
-        if let Some(extended) = likely_subtags::add(requested_locale.to_string().as_ref()) {
-            let requested_locale = Locale::from_str(&extended).unwrap();
-            available.retain(|key| {
-                if strategy != &NegotiationStrategy::Filtering && match_found {
+        req.set_region(None).unwrap();
+        if let Some(req) = likely_subtags::add(&req) {
+            av_map.retain(|key, value| {
+                if strategy != NegotiationStrategy::Filtering && match_found {
                     return true;
                 }
 
-                if available_locales
-                    .get(key)
-                    .expect("Available key should be available")
-                    .matches(&requested_locale, true, false)
-                {
-                    supported_locales.push(*key);
+                if key.matches(&req, true, false) {
                     match_found = true;
+                    supported_locales.push(*value);
                     return false;
                 }
                 true
             });
-        }
 
-        if match_found {
-            match *strategy {
-                NegotiationStrategy::Filtering => {}
-                NegotiationStrategy::Matching => continue,
-                NegotiationStrategy::Lookup => break,
-            };
-        }
+            if match_found {
+                match strategy {
+                    NegotiationStrategy::Filtering => {}
+                    NegotiationStrategy::Matching => continue,
+                    NegotiationStrategy::Lookup => break,
+                };
+            }
 
-        match_found = false;
+            match_found = false;
+        }
 
         // 6) Try to match against a region as a range
-        requested_locale.set_region(None).unwrap();
-        available.retain(|key| {
-            if strategy != &NegotiationStrategy::Filtering && match_found {
+        req.set_region(None).unwrap();
+        av_map.retain(|key, value| {
+            if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
 
-            if available_locales
-                .get(key)
-                .expect("Available key should be available")
-                .matches(&requested_locale, true, true)
-            {
-                supported_locales.push(*key);
+            if key.matches(&req, true, true) {
                 match_found = true;
+                supported_locales.push(*value);
                 return false;
             }
             true
         });
 
         if match_found {
-            match *strategy {
+            match strategy {
                 NegotiationStrategy::Filtering => {}
                 NegotiationStrategy::Matching => continue,
                 NegotiationStrategy::Lookup => break,
@@ -326,26 +314,33 @@ fn filter_matches<'a>(
     supported_locales
 }
 
-pub fn negotiate_languages<'a, R: AsRef<str>, A: AsRef<str>>(
-    requested: &'a [R],
-    available: &'a [A],
-    default: Option<&'a str>,
-    strategy: &NegotiationStrategy,
-) -> Vec<&'a str> {
-    let mut supported = filter_matches(
-        &requested.iter().map(AsRef::as_ref).collect::<Vec<_>>(),
-        &available.iter().map(AsRef::as_ref).collect::<Vec<_>>(),
-        strategy,
-    );
+pub fn negotiate_languages<
+    'a,
+    R: 'a + Into<LanguageIdentifier> + PartialEq + Clone,
+    A: 'a + Into<LanguageIdentifier> + PartialEq + Clone,
+>(
+    requested: impl IntoIterator<Item = &'a R>,
+    available: impl IntoIterator<Item = &'a A>,
+    default: Option<&'a A>,
+    strategy: NegotiationStrategy,
+) -> Vec<&A> {
+    let mut supported = filter_matches(requested, available, strategy);
 
-    if let Some(d) = default {
-        if strategy == &NegotiationStrategy::Lookup {
+    if let Some(default) = default {
+        if strategy == NegotiationStrategy::Lookup {
             if supported.is_empty() {
-                supported.push(d);
+                supported.push(default);
             }
-        } else if !supported.contains(&d) {
-            supported.push(d);
+        } else if !supported.contains(&default) {
+            supported.push(default);
         }
     }
     supported
+}
+
+pub fn convert_vec_str_to_langids(input: &[&str]) -> Vec<LanguageIdentifier> {
+    input
+        .iter()
+        .filter_map(|t| (*t).try_into().ok())
+        .collect()
 }

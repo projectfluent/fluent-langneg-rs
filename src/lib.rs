@@ -19,5 +19,6 @@ pub mod accepted_languages;
 pub mod negotiate;
 
 pub use accepted_languages::parse as parse_accepted_languages;
+pub use negotiate::convert_vec_str_to_langids;
 pub use negotiate::negotiate_languages;
 pub use negotiate::NegotiationStrategy;
