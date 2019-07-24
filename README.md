@@ -18,15 +18,29 @@ Usage
 -----
 
 ```rust
-use fluent_locale::negotiate::NegotiationStrategy;
+use std::convert::TryFrom
+
 use fluent_locale::negotiate_languages;
+use fluent_locale::NegotiationStrategy;
+use fluent_locale::convert_vec_str_to_langids;
+use unic_langid::LanguageIdentifier
+
+// Since langid parsing from string is fallible, we'll use a helper
+// function which strips any langids that failed to parse.
+let requested = convert_vec_str_to_langids(&["de-DE", "fr-FR", "en-US"]);
+let available = convert_vec_str_to_langids(&["it", "fr", "de-AT", "fr-CA", "en-US"]);
+let default = LanguageIdentifier::try_from("en-US").expect("Parsing langid failed.");
 
 let supported = negotiate_languages(
-  &["de-DE", "fr-FR", "en-US"],
-  &["de-DE", "de-AT", "fr-CA", "fr", "en-GB", "en", "en-US", "it"],
-  Some("en-US"),
-  &NegotiationStrategy::Filtering
+  &requested,
+  &available,
+  Some(&default),
+  NegotiationStrategy::Filtering
 );
+
+let expected = convert_vec_str_to_langids(&["de-AT", "fr", "fr-CA", "en-US"]);
+assert_eq!(supported,
+            expected.iter().map(|t| t.as_ref()).collect::<Vec<&LanguageIdentifier>>());
 ```
 
 See [docs.rs][] for more examples.
@@ -38,6 +52,11 @@ Status
 
 The implementation is in early stage, but is complete according to fluent-locale
 corpus of tests, which means that it parses, serializes and negotiates as expected.
+
+The negotiation methods can operate on lists of `LanguageIdentifier` or `Locale`.
+
+The ergonomics of Rust API can be improved, since the fallible nature of language identifier
+parsing makes operating on lists of them tedious.
 
 The remaining work is on the path to 1.0 is to gain in-field experience of using it,
 add more tests and ensure that bad input is correctly handled.
@@ -54,16 +73,8 @@ For most locale management and negotiation needs, the Unicode Locale Identifier 
 but in some case, like HTTP Accepted Headers, you may need the complete BCP47 Language Tag implementation which
 this crate does not provide.
 
-Parsed locale identifiers are stored as `Locale` objects compatible with
-ECMA402's [Intl.Locale][] and allow for operations on locale identifier subtags and
-unicode extension keys as defined by [RFC6067][] and Unicode [UTS35][]
-
 Language negotiation algorithms are custom Project Fluent solutions,
 based on [RFC4647][].
-
-The current API only allows for operations on basic language subtags (language, script, region, variants)
-and unicode extension keys. Other subtags will be parsed and serialized, but there is no
-API access to them when operating on the `Locale` object.
 
 The language negotiation strategies aim to replicate the best-effort matches with
 the most limited amount of data. The algorithm returns reasonable
@@ -77,9 +88,10 @@ tradeoffs.
 [BCP47]: https://tools.ietf.org/html/bcp47
 [Intl.Locale]: https://github.com/tc39/proposal-intl-locale
 [RFC6067]: https://www.ietf.org/rfc/rfc6067.txt
-[UTS35]: http://www.unicode.org/reports/tr35/#Locale_Extension_Key_and_Type_Data
+[UTS 35]: http://www.unicode.org/reports/tr35/#Locale_Extension_Key_and_Type_Data
 [RFC4647]: https://tools.ietf.org/html/rfc4647
 [CLDR likely-subtags]: http://www.unicode.org/cldr/charts/latest/supplemental/likely_subtags.html
+[Unicode Locale Identifier]: (http://unicode.org/reports/tr35/#Identifiers)
 
 Alternatives
 ------------
