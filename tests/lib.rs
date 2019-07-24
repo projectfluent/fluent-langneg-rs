@@ -1,4 +1,4 @@
-use std::convert::TryInto;
+use std::convert::{TryFrom, TryInto};
 use std::error::Error;
 use std::fs;
 use std::fs::File;
@@ -8,6 +8,7 @@ use fluent_locale::negotiate::negotiate_languages;
 use fluent_locale::negotiate::NegotiationStrategy;
 use fluent_locale::parse_accepted_languages;
 use unic_langid::LanguageIdentifier;
+use unic_locale::Locale;
 
 #[macro_use]
 extern crate serde_derive;
@@ -69,19 +70,19 @@ fn test_negotiate_fixtures(path: &str) {
             }
             NegotiateTestInput::Default(requested, available, default) => {
                 let requested: Vec<LanguageIdentifier> =
-                    dbg!(requested.iter().map(|v| v.try_into().unwrap()).collect());
+                    requested.iter().map(|v| v.try_into().unwrap()).collect();
                 let available: Vec<LanguageIdentifier> =
-                    dbg!(available.iter().map(|v| v.try_into().unwrap()).collect());
+                    available.iter().map(|v| v.try_into().unwrap()).collect();
                 let output: Vec<LanguageIdentifier> =
                     test.output.iter().map(|v| v.try_into().unwrap()).collect();
                 let output2: Vec<&LanguageIdentifier> = output.iter().map(|t| t.as_ref()).collect();
                 assert_eq!(
-                    dbg!(negotiate_languages(
+                    negotiate_languages(
                         &requested,
                         &available,
                         default.try_into().ok().as_ref(),
                         strategy
-                    )),
+                    ),
                     output2,
                     "Test in {} failed",
                     path
@@ -134,4 +135,23 @@ fn accepted_languages() {
             test.output.iter().map(|v| v.try_into().unwrap()).collect();
         assert_eq!(output, locales);
     }
+}
+
+#[test]
+fn locale_matching() {
+    let loc_en_us = Locale::try_from("en-US-u-hc-h12").expect("Parsing failed.");
+    let loc_de_at = Locale::try_from("de-AT-u-hc-h24").expect("Parsing failed.");
+    let loc_en = Locale::try_from("en-u-ca-buddhist").expect("Parsing failed.");
+    let loc_de = Locale::try_from("de").expect("Parsing failed.");
+    let loc_pl = Locale::try_from("pl-x-private").expect("Parsing failed.");
+
+    assert_eq!(
+        negotiate_languages(
+            vec![&loc_en_us, &loc_de_at],
+            vec![&loc_pl, &loc_de, &loc_en],
+            None,
+            NegotiationStrategy::Matching
+        ),
+        vec![&loc_en, &loc_de],
+    );
 }

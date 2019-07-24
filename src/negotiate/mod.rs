@@ -12,7 +12,7 @@
 //!
 //! ```
 //! use std::convert::TryFrom;
-//! 
+//!
 //! use fluent_locale::negotiate_languages;
 //! use fluent_locale::NegotiationStrategy;
 //! use fluent_locale::convert_vec_str_to_langids;
@@ -339,8 +339,5 @@ pub fn negotiate_languages<
 }
 
 pub fn convert_vec_str_to_langids(input: &[&str]) -> Vec<LanguageIdentifier> {
-    input
-        .iter()
-        .filter_map(|t| (*t).try_into().ok())
-        .collect()
+    input.iter().filter_map(|t| (*t).try_into().ok()).collect()
 }
