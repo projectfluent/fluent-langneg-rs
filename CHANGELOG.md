@@ -4,6 +4,11 @@
 
   - …
 
+## fluent-locale 0.6.0 (July 24, 2019)
+
+  - Switch to use `unic-langid` (but allow for `unic-locale`).
+  - Refactor the API to handle fallible lists.
+
 ## fluent-locale 0.5.0 (June 16, 2019)
 
   - Separate out `unic-langid` and `unic-locale` into new crates.
