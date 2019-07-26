@@ -18,18 +18,16 @@ Usage
 -----
 
 ```rust
-use std::convert::TryFrom
-
 use fluent_locale::negotiate_languages;
 use fluent_locale::NegotiationStrategy;
-use fluent_locale::convert_vec_str_to_langids;
+use fluent_locale::convert_vec_str_to_langids_lossy;
 use unic_langid::LanguageIdentifier
 
 // Since langid parsing from string is fallible, we'll use a helper
 // function which strips any langids that failed to parse.
-let requested = convert_vec_str_to_langids(&["de-DE", "fr-FR", "en-US"]);
-let available = convert_vec_str_to_langids(&["it", "fr", "de-AT", "fr-CA", "en-US"]);
-let default = LanguageIdentifier::try_from("en-US").expect("Parsing langid failed.");
+let requested = convert_vec_str_to_langids_lossy(&["de-DE", "fr-FR", "en-US"]);
+let available = convert_vec_str_to_langids_lossy(&["it", "fr", "de-AT", "fr-CA", "en-US"]);
+let default: LanguageIdentifier = "en-US".parse().expect("Parsing langid failed.");
 
 let supported = negotiate_languages(
   &requested,
@@ -38,7 +36,7 @@ let supported = negotiate_languages(
   NegotiationStrategy::Filtering
 );
 
-let expected = convert_vec_str_to_langids(&["de-AT", "fr", "fr-CA", "en-US"]);
+let expected = convert_vec_str_to_langids_lossy(&["de-AT", "fr", "fr-CA", "en-US"]);
 assert_eq!(supported,
             expected.iter().map(|t| t.as_ref()).collect::<Vec<&LanguageIdentifier>>());
 ```

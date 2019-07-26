@@ -1,4 +1,3 @@
-use std::convert::TryFrom;
 use unic_langid::LanguageIdentifier;
 
 static REGION_MATCHING_KEYS: &[&str] = &[
@@ -7,13 +6,13 @@ static REGION_MATCHING_KEYS: &[&str] = &[
 
 pub fn add(langid: &LanguageIdentifier) -> Option<LanguageIdentifier> {
     let extended = match langid.to_string().as_str() {
-        "en" => LanguageIdentifier::try_from("en-Latn-US"),
-        "fr" => LanguageIdentifier::try_from("fr-Latn-FR"),
-        "sr" => LanguageIdentifier::try_from("sr-Cyrl-SR"),
-        "sr-RU" => LanguageIdentifier::try_from("sr-Latn-SR"),
-        "az-IR" => LanguageIdentifier::try_from("az-Aram-IR"),
-        "zh-GB" => LanguageIdentifier::try_from("zh-Hant-GB"),
-        "zh-US" => LanguageIdentifier::try_from("zh-Hant-US"),
+        "en" => "en-Latn-US",
+        "fr" => "fr-Latn-FR",
+        "sr" => "sr-Cyrl-SR",
+        "sr-RU" => "sr-Latn-SR",
+        "az-IR" => "az-Aram-IR",
+        "zh-GB" => "zh-Hant-GB",
+        "zh-US" => "zh-Hant-US",
         _ => {
             let lang = langid.get_language();
 
@@ -27,6 +26,7 @@ pub fn add(langid: &LanguageIdentifier) -> Option<LanguageIdentifier> {
             return None;
         }
     };
+    let langid: LanguageIdentifier = extended.parse().expect("Failed to parse langid.");
 
-    Some(extended.expect("Failed to parse langid.").to_owned())
+    Some(langid)
 }

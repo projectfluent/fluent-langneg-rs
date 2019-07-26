@@ -2,9 +2,8 @@
 
 extern crate test;
 
-use fluent_locale::convert_vec_str_to_langids;
+use fluent_locale::convert_vec_str_to_langids_lossy;
 use fluent_locale::negotiate_languages;
-use std::convert::TryFrom;
 use test::Bencher;
 use unic_langid::LanguageIdentifier;
 
@@ -17,7 +16,7 @@ fn bench_locale(b: &mut Bencher) {
 
     b.iter(|| {
         for locale in &langids {
-            let _ = LanguageIdentifier::try_from(*locale).unwrap();
+            let _: LanguageIdentifier = locale.parse().unwrap();
         }
     });
 }
@@ -30,8 +29,8 @@ fn bench_negotiate(b: &mut Bencher) {
         "ja-JP", "he-IL", "de-DE", "de-IT",
     ];
 
-    let requested = convert_vec_str_to_langids(&requested);
-    let available = convert_vec_str_to_langids(&available);
+    let requested = convert_vec_str_to_langids_lossy(&requested);
+    let available = convert_vec_str_to_langids_lossy(&available);
 
     b.iter(|| {
         negotiate_languages(

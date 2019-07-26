@@ -1,4 +1,3 @@
-use std::convert::{TryFrom, TryInto};
 use std::error::Error;
 use std::fs;
 use std::fs::File;
@@ -55,11 +54,11 @@ fn test_negotiate_fixtures(path: &str) {
         match test.input {
             NegotiateTestInput::NoDefault(requested, available) => {
                 let requested: Vec<LanguageIdentifier> =
-                    dbg!(requested.iter().map(|v| v.try_into().unwrap()).collect());
+                    dbg!(requested.iter().map(|v| v.parse().unwrap()).collect());
                 let available: Vec<LanguageIdentifier> =
-                    dbg!(available.iter().map(|v| v.try_into().unwrap()).collect());
+                    dbg!(available.iter().map(|v| v.parse().unwrap()).collect());
                 let output: Vec<LanguageIdentifier> =
-                    test.output.iter().map(|v| v.try_into().unwrap()).collect();
+                    test.output.iter().map(|v| v.parse().unwrap()).collect();
                 let output2: Vec<&LanguageIdentifier> = output.iter().map(|t| t.as_ref()).collect();
                 assert_eq!(
                     negotiate_languages(&requested, &available, None, strategy),
@@ -70,17 +69,17 @@ fn test_negotiate_fixtures(path: &str) {
             }
             NegotiateTestInput::Default(requested, available, default) => {
                 let requested: Vec<LanguageIdentifier> =
-                    requested.iter().map(|v| v.try_into().unwrap()).collect();
+                    requested.iter().map(|v| v.parse().unwrap()).collect();
                 let available: Vec<LanguageIdentifier> =
-                    available.iter().map(|v| v.try_into().unwrap()).collect();
+                    available.iter().map(|v| v.parse().unwrap()).collect();
                 let output: Vec<LanguageIdentifier> =
-                    test.output.iter().map(|v| v.try_into().unwrap()).collect();
+                    test.output.iter().map(|v| v.parse().unwrap()).collect();
                 let output2: Vec<&LanguageIdentifier> = output.iter().map(|t| t.as_ref()).collect();
                 assert_eq!(
                     negotiate_languages(
                         &requested,
                         &available,
-                        default.try_into().ok().as_ref(),
+                        default.parse().ok().as_ref(),
                         strategy
                     ),
                     output2,
@@ -132,18 +131,18 @@ fn accepted_languages() {
     for test in tests {
         let locales = parse_accepted_languages(test.input.as_str());
         let output: Vec<LanguageIdentifier> =
-            test.output.iter().map(|v| v.try_into().unwrap()).collect();
+            test.output.iter().map(|v| v.parse().unwrap()).collect();
         assert_eq!(output, locales);
     }
 }
 
 #[test]
 fn locale_matching() {
-    let loc_en_us = Locale::try_from("en-US-u-hc-h12").expect("Parsing failed.");
-    let loc_de_at = Locale::try_from("de-AT-u-hc-h24").expect("Parsing failed.");
-    let loc_en = Locale::try_from("en-u-ca-buddhist").expect("Parsing failed.");
-    let loc_de = Locale::try_from("de").expect("Parsing failed.");
-    let loc_pl = Locale::try_from("pl-x-private").expect("Parsing failed.");
+    let loc_en_us: Locale = "en-US-u-hc-h12".parse().expect("Parsing failed.");
+    let loc_de_at: Locale = "de-AT-u-hc-h24".parse().expect("Parsing failed.");
+    let loc_en: Locale = "en-u-ca-buddhist".parse().expect("Parsing failed.");
+    let loc_de: Locale = "de".parse().expect("Parsing failed.");
+    let loc_pl: Locale = "pl-x-private".parse().expect("Parsing failed.");
 
     assert_eq!(
         negotiate_languages(

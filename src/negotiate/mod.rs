@@ -11,16 +11,14 @@
 //! # Example:
 //!
 //! ```
-//! use std::convert::TryFrom;
-//!
 //! use fluent_locale::negotiate_languages;
 //! use fluent_locale::NegotiationStrategy;
-//! use fluent_locale::convert_vec_str_to_langids;
+//! use fluent_locale::convert_vec_str_to_langids_lossy;
 //! use unic_langid::LanguageIdentifier;
 //!
-//! let requested = convert_vec_str_to_langids(&["pl", "fr", "en-US"]);
-//! let available = convert_vec_str_to_langids(&["it", "de", "fr", "en-GB", "en_US"]);
-//! let default = LanguageIdentifier::try_from("en-US").expect("Parsing langid failed.");
+//! let requested = convert_vec_str_to_langids_lossy(&["pl", "fr", "en-US"]);
+//! let available = convert_vec_str_to_langids_lossy(&["it", "de", "fr", "en-GB", "en_US"]);
+//! let default: LanguageIdentifier = "en-US".parse().expect("Parsing langid failed.");
 //!
 //! let supported = negotiate_languages(
 //!   &requested,
@@ -29,7 +27,7 @@
 //!   NegotiationStrategy::Filtering
 //! );
 //!
-//! let expected = convert_vec_str_to_langids(&["fr", "en-US", "en-GB"]);
+//! let expected = convert_vec_str_to_langids_lossy(&["fr", "en-US", "en-GB"]);
 //! assert_eq!(supported,
 //!            expected.iter().map(|t| t.as_ref()).collect::<Vec<&LanguageIdentifier>>());
 //! ```
@@ -122,7 +120,6 @@
 //!
 
 use std::collections::HashMap;
-use std::convert::TryInto;
 use unic_langid::LanguageIdentifier;
 
 mod likely_subtags;
@@ -136,8 +133,8 @@ pub enum NegotiationStrategy {
 
 pub fn filter_matches<
     'a,
-    R: 'a + Into<LanguageIdentifier> + PartialEq + Clone,
-    A: 'a + Into<LanguageIdentifier> + PartialEq + Clone,
+    R: 'a + Into<LanguageIdentifier> + Clone,
+    A: 'a + Into<LanguageIdentifier> + Clone,
 >(
     requested: impl IntoIterator<Item = &'a R>,
     available: impl IntoIterator<Item = &'a A>,
@@ -316,7 +313,7 @@ pub fn filter_matches<
 
 pub fn negotiate_languages<
     'a,
-    R: 'a + Into<LanguageIdentifier> + PartialEq + Clone,
+    R: 'a + Into<LanguageIdentifier> + Clone,
     A: 'a + Into<LanguageIdentifier> + PartialEq + Clone,
 >(
     requested: impl IntoIterator<Item = &'a R>,
@@ -338,6 +335,6 @@ pub fn negotiate_languages<
     supported
 }
 
-pub fn convert_vec_str_to_langids(input: &[&str]) -> Vec<LanguageIdentifier> {
-    input.iter().filter_map(|t| (*t).try_into().ok()).collect()
+pub fn convert_vec_str_to_langids_lossy(input: &[&str]) -> Vec<LanguageIdentifier> {
+    input.iter().filter_map(|t| t.parse().ok()).collect()
 }
