@@ -334,7 +334,3 @@ pub fn negotiate_languages<
     }
     supported
 }
-
-pub fn convert_vec_str_to_langids_lossy(input: &[&str]) -> Vec<LanguageIdentifier> {
-    input.iter().filter_map(|t| t.parse().ok()).collect()
-}

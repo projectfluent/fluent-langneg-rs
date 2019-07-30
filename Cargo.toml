@@ -24,7 +24,7 @@ unic-langid = "0.4"
 [dev-dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-unic-locale = "0.4"
+unic-locale = { version = "0.4", features = ["macros"] }
 criterion = "0.2"
 
 [[bench]]

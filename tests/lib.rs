@@ -3,11 +3,12 @@ use std::fs;
 use std::fs::File;
 use std::path::Path;
 
+use fluent_locale::convert_vec_str_to_langids;
 use fluent_locale::negotiate_languages;
 use fluent_locale::parse_accepted_languages;
 use fluent_locale::NegotiationStrategy;
 use unic_langid::LanguageIdentifier;
-use unic_locale::Locale;
+use unic_locale::locale;
 
 use serde::{Deserialize, Serialize};
 
@@ -52,12 +53,12 @@ fn test_negotiate_fixtures(path: &str) {
         };
         match test.input {
             NegotiateTestInput::NoDefault(requested, available) => {
-                let requested: Vec<LanguageIdentifier> =
-                    dbg!(requested.iter().map(|v| v.parse().unwrap()).collect());
-                let available: Vec<LanguageIdentifier> =
-                    dbg!(available.iter().map(|v| v.parse().unwrap()).collect());
-                let output: Vec<LanguageIdentifier> =
-                    test.output.iter().map(|v| v.parse().unwrap()).collect();
+                let requested =
+                    convert_vec_str_to_langids(requested).expect("Failed to read langid list");
+                let available =
+                    convert_vec_str_to_langids(available).expect("Failed to read langid list");
+                let output =
+                    convert_vec_str_to_langids(test.output).expect("Failed to read langid list");
                 let output2: Vec<&LanguageIdentifier> = output.iter().map(|t| t.as_ref()).collect();
                 assert_eq!(
                     negotiate_languages(&requested, &available, None, strategy),
@@ -67,12 +68,12 @@ fn test_negotiate_fixtures(path: &str) {
                 );
             }
             NegotiateTestInput::Default(requested, available, default) => {
-                let requested: Vec<LanguageIdentifier> =
-                    requested.iter().map(|v| v.parse().unwrap()).collect();
-                let available: Vec<LanguageIdentifier> =
-                    available.iter().map(|v| v.parse().unwrap()).collect();
-                let output: Vec<LanguageIdentifier> =
-                    test.output.iter().map(|v| v.parse().unwrap()).collect();
+                let requested =
+                    convert_vec_str_to_langids(requested).expect("Failed to read langid list");
+                let available =
+                    convert_vec_str_to_langids(available).expect("Failed to read langid list");
+                let output =
+                    convert_vec_str_to_langids(test.output).expect("Failed to read langid list");
                 let output2: Vec<&LanguageIdentifier> = output.iter().map(|t| t.as_ref()).collect();
                 assert_eq!(
                     negotiate_languages(
@@ -129,19 +130,18 @@ fn accepted_languages() {
 
     for test in tests {
         let locales = parse_accepted_languages(test.input.as_str());
-        let output: Vec<LanguageIdentifier> =
-            test.output.iter().map(|v| v.parse().unwrap()).collect();
+        let output = convert_vec_str_to_langids(test.output).expect("Failed to read langid list");
         assert_eq!(output, locales);
     }
 }
 
 #[test]
 fn locale_matching() {
-    let loc_en_us: Locale = "en-US-u-hc-h12".parse().expect("Parsing failed.");
-    let loc_de_at: Locale = "de-AT-u-hc-h24".parse().expect("Parsing failed.");
-    let loc_en: Locale = "en-u-ca-buddhist".parse().expect("Parsing failed.");
-    let loc_de: Locale = "de".parse().expect("Parsing failed.");
-    let loc_pl: Locale = "pl-x-private".parse().expect("Parsing failed.");
+    let loc_en_us = locale!("en-US-u-hc-h12");
+    let loc_de_at = locale!("de-AT-u-hc-h24");
+    let loc_en = locale!("en-u-ca-buddhist");
+    let loc_de = locale!("de");
+    let loc_pl = locale!("pl-x-private");
 
     assert_eq!(
         negotiate_languages(

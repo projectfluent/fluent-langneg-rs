@@ -19,6 +19,30 @@ pub mod accepted_languages;
 pub mod negotiate;
 
 pub use accepted_languages::parse as parse_accepted_languages;
-pub use negotiate::convert_vec_str_to_langids_lossy;
 pub use negotiate::negotiate_languages;
 pub use negotiate::NegotiationStrategy;
+
+pub fn convert_vec_str_to_langids<'a, I, J>(
+    input: I,
+) -> Result<Vec<unic_langid::LanguageIdentifier>, unic_langid::errors::LanguageIdentifierError>
+where
+    I: IntoIterator<Item = J>,
+    J: AsRef<str> + 'a,
+{
+    let mut result = vec![];
+    for elem in input.into_iter() {
+        result.push(elem.as_ref().parse()?);
+    }
+    Ok(result)
+}
+
+pub fn convert_vec_str_to_langids_lossy<'a, I, J>(input: I) -> Vec<unic_langid::LanguageIdentifier>
+where
+    I: IntoIterator<Item = J>,
+    J: AsRef<str> + 'a,
+{
+    input
+        .into_iter()
+        .filter_map(|t| t.as_ref().parse().ok())
+        .collect()
+}
