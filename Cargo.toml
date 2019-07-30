@@ -3,7 +3,7 @@ name = "fluent-locale"
 description = """
 A library for language and locale negotiation.
 """
-version = "0.6.0"
+version = "0.7.0"
 authors = ["Zibi Braniecki <gandalf@mozilla.com>"]
 homepage = "http://projectfluent.org/"
 license = "Apache-2.0"

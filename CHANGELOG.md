@@ -4,6 +4,12 @@
 
   - …
 
+## fluent-locale 0.7.0 (July 30, 2019)
+
+  - Update `unic-langid` to 0.4.
+  - Switch benchmark to criterion.
+  - Update helper functions to be more generic.
+
 ## fluent-locale 0.6.0 (July 24, 2019)
 
   - Switch to use `unic-langid` (but allow for `unic-locale`).
