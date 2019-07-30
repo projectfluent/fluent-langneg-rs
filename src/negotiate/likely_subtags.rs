@@ -10,7 +10,7 @@ pub fn add(langid: &LanguageIdentifier) -> Option<LanguageIdentifier> {
         "fr" => "fr-Latn-FR",
         "sr" => "sr-Cyrl-SR",
         "sr-RU" => "sr-Latn-SR",
-        "az-IR" => "az-Aram-IR",
+        "az-IR" => "az-Arab-IR",
         "zh-GB" => "zh-Hant-GB",
         "zh-US" => "zh-Hant-US",
         _ => {

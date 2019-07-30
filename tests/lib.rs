@@ -3,7 +3,7 @@ use std::fs;
 use std::fs::File;
 use std::path::Path;
 
-use fluent_locale::convert_vec_str_to_langids;
+use fluent_locale::convert_vec_str_to_langids_lossy;
 use fluent_locale::negotiate_languages;
 use fluent_locale::parse_accepted_languages;
 use fluent_locale::NegotiationStrategy;
@@ -39,6 +39,7 @@ fn read_negotiate_testsets<P: AsRef<Path>>(path: P) -> Result<Vec<NegotiateTestS
 }
 
 fn test_negotiate_fixtures(path: &str) {
+    println!("Testing path: {}", path);
     let tests = read_negotiate_testsets(path).unwrap();
 
     for test in tests {
@@ -53,12 +54,9 @@ fn test_negotiate_fixtures(path: &str) {
         };
         match test.input {
             NegotiateTestInput::NoDefault(requested, available) => {
-                let requested =
-                    convert_vec_str_to_langids(requested).expect("Failed to read langid list");
-                let available =
-                    convert_vec_str_to_langids(available).expect("Failed to read langid list");
-                let output =
-                    convert_vec_str_to_langids(test.output).expect("Failed to read langid list");
+                let requested = convert_vec_str_to_langids_lossy(requested);
+                let available = convert_vec_str_to_langids_lossy(available);
+                let output = convert_vec_str_to_langids_lossy(test.output);
                 let output2: Vec<&LanguageIdentifier> = output.iter().map(|t| t.as_ref()).collect();
                 assert_eq!(
                     negotiate_languages(&requested, &available, None, strategy),
@@ -68,12 +66,9 @@ fn test_negotiate_fixtures(path: &str) {
                 );
             }
             NegotiateTestInput::Default(requested, available, default) => {
-                let requested =
-                    convert_vec_str_to_langids(requested).expect("Failed to read langid list");
-                let available =
-                    convert_vec_str_to_langids(available).expect("Failed to read langid list");
-                let output =
-                    convert_vec_str_to_langids(test.output).expect("Failed to read langid list");
+                let requested = convert_vec_str_to_langids_lossy(requested);
+                let available = convert_vec_str_to_langids_lossy(available);
+                let output = convert_vec_str_to_langids_lossy(test.output);
                 let output2: Vec<&LanguageIdentifier> = output.iter().map(|t| t.as_ref()).collect();
                 assert_eq!(
                     negotiate_languages(
@@ -97,9 +92,7 @@ fn negotiate_filtering() {
 
     for path in paths {
         let p = path.unwrap().path().to_str().unwrap().to_owned();
-        if p.contains("available") {
-            test_negotiate_fixtures(p.as_str());
-        }
+        test_negotiate_fixtures(p.as_str());
     }
 }
 
@@ -130,7 +123,7 @@ fn accepted_languages() {
 
     for test in tests {
         let locales = parse_accepted_languages(test.input.as_str());
-        let output = convert_vec_str_to_langids(test.output).expect("Failed to read langid list");
+        let output = convert_vec_str_to_langids_lossy(test.output);
         assert_eq!(output, locales);
     }
 }

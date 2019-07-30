@@ -121,7 +121,6 @@
 
 use std::collections::HashMap;
 use unic_langid::LanguageIdentifier;
-
 mod likely_subtags;
 
 #[derive(PartialEq, Debug, Clone, Copy)]
@@ -151,7 +150,7 @@ pub fn filter_matches<
     let req_langids: Vec<LanguageIdentifier> =
         requested.into_iter().map(|a| a.clone().into()).collect();
 
-    for mut req in req_langids {
+    for req in req_langids {
         if req.get_language() == "und" {
             continue;
         }
@@ -207,7 +206,7 @@ pub fn filter_matches<
         match_found = false;
 
         // 3) Try to match against a maximized version of the requested locale
-        if let Some(req) = likely_subtags::add(&req) {
+        let mut req = if let Some(req) = likely_subtags::add(&req) {
             av_map.retain(|key, value| {
                 if strategy != NegotiationStrategy::Filtering && match_found {
                     return true;
@@ -230,7 +229,10 @@ pub fn filter_matches<
             }
 
             match_found = false;
-        }
+            req
+        } else {
+            req
+        };
 
         // 4) Try to match against a variant as a range
         req.set_variants(&[]).unwrap();
