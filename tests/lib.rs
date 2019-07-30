@@ -3,14 +3,13 @@ use std::fs;
 use std::fs::File;
 use std::path::Path;
 
-use fluent_locale::negotiate::negotiate_languages;
-use fluent_locale::negotiate::NegotiationStrategy;
+use fluent_locale::negotiate_languages;
 use fluent_locale::parse_accepted_languages;
+use fluent_locale::NegotiationStrategy;
 use unic_langid::LanguageIdentifier;
 use unic_locale::Locale;
 
-#[macro_use]
-extern crate serde_derive;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 #[serde(untagged)]
