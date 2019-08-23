@@ -119,7 +119,6 @@
 //! ```
 //!
 
-use std::collections::HashMap;
 use unic_langid::LanguageIdentifier;
 mod likely_subtags;
 
@@ -141,11 +140,10 @@ pub fn filter_matches<
 ) -> Vec<&'a A> {
     let mut supported_locales = vec![];
 
-    let mut av_map: HashMap<LanguageIdentifier, &'a A> = HashMap::new();
-
-    for av in available.into_iter() {
-        av_map.insert(av.clone().into(), av);
-    }
+    let mut av_map: Vec<(LanguageIdentifier, &'a A)> = available
+        .into_iter()
+        .map(|av| (av.clone().into(), av))
+        .collect();
 
     let req_langids: Vec<LanguageIdentifier> =
         requested.into_iter().map(|a| a.clone().into()).collect();
@@ -158,7 +156,7 @@ pub fn filter_matches<
         let mut match_found = false;
 
         // 1) Try to find a simple (case-insensitive) string match for the request.
-        av_map.retain(|key, value| {
+        av_map.retain(|(key, value)| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
@@ -182,7 +180,7 @@ pub fn filter_matches<
         match_found = false;
 
         // 2) Try to match against the available locales treated as ranges.
-        av_map.retain(|key, value| {
+        av_map.retain(|(key, value)| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
@@ -207,7 +205,7 @@ pub fn filter_matches<
 
         // 3) Try to match against a maximized version of the requested locale
         let mut req = if let Some(req) = likely_subtags::add(&req) {
-            av_map.retain(|key, value| {
+            av_map.retain(|(key, value)| {
                 if strategy != NegotiationStrategy::Filtering && match_found {
                     return true;
                 }
@@ -236,7 +234,7 @@ pub fn filter_matches<
 
         // 4) Try to match against a variant as a range
         req.set_variants(&[]).unwrap();
-        av_map.retain(|key, value| {
+        av_map.retain(|(key, value)| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
@@ -262,7 +260,7 @@ pub fn filter_matches<
         // 5) Try to match against the likely subtag without region
         req.set_region(None).unwrap();
         if let Some(req) = likely_subtags::add(&req) {
-            av_map.retain(|key, value| {
+            av_map.retain(|(key, value)| {
                 if strategy != NegotiationStrategy::Filtering && match_found {
                     return true;
                 }
@@ -288,7 +286,7 @@ pub fn filter_matches<
 
         // 6) Try to match against a region as a range
         req.set_region(None).unwrap();
-        av_map.retain(|key, value| {
+        av_map.retain(|(key, value)| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
