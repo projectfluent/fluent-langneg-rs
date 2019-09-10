@@ -119,7 +119,8 @@
 //! ```
 //!
 
-use std::collections::HashMap;
+use core::borrow::Borrow;
+use std::collections::HashSet;
 use unic_langid::LanguageIdentifier;
 mod likely_subtags;
 
@@ -133,7 +134,12 @@ pub enum NegotiationStrategy {
 pub fn filter_matches<
     'a,
     R: 'a + Into<LanguageIdentifier> + Clone,
-    A: 'a + Into<LanguageIdentifier> + Clone,
+    A: 'a
+        + Into<LanguageIdentifier>
+        + Borrow<LanguageIdentifier>
+        + Clone
+        + std::hash::Hash
+        + std::cmp::Eq,
 >(
     requested: impl IntoIterator<Item = &'a R>,
     available: impl IntoIterator<Item = &'a A>,
@@ -141,10 +147,10 @@ pub fn filter_matches<
 ) -> Vec<&'a A> {
     let mut supported_locales = vec![];
 
-    let mut av_map: HashMap<LanguageIdentifier, &'a A> = HashMap::new();
+    let mut av_map: HashSet<&'a A> = HashSet::new();
 
     for av in available.into_iter() {
-        av_map.insert(av.clone().into(), av);
+        av_map.insert(av);
     }
 
     let req_langids: Vec<LanguageIdentifier> =
@@ -158,12 +164,12 @@ pub fn filter_matches<
         let mut match_found = false;
 
         // 1) Try to find a simple (case-insensitive) string match for the request.
-        av_map.retain(|key, value| {
+        av_map.retain(|value| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
 
-            if key.matches(&req, false, false) {
+            if (*value).borrow().matches(&req, false, false) {
                 match_found = true;
                 supported_locales.push(*value);
                 return false;
@@ -182,12 +188,12 @@ pub fn filter_matches<
         match_found = false;
 
         // 2) Try to match against the available locales treated as ranges.
-        av_map.retain(|key, value| {
+        av_map.retain(|value| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
 
-            if key.matches(&req, true, false) {
+            if (*value).borrow().matches(&req, true, false) {
                 match_found = true;
                 supported_locales.push(*value);
                 return false;
@@ -207,12 +213,12 @@ pub fn filter_matches<
 
         // 3) Try to match against a maximized version of the requested locale
         let mut req = if let Some(req) = likely_subtags::add(&req) {
-            av_map.retain(|key, value| {
+            av_map.retain(|value| {
                 if strategy != NegotiationStrategy::Filtering && match_found {
                     return true;
                 }
 
-                if key.matches(&req, true, false) {
+                if (*value).borrow().matches(&req, true, false) {
                     match_found = true;
                     supported_locales.push(*value);
                     return false;
@@ -236,12 +242,12 @@ pub fn filter_matches<
 
         // 4) Try to match against a variant as a range
         req.set_variants(&[]).unwrap();
-        av_map.retain(|key, value| {
+        av_map.retain(|value| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
 
-            if key.matches(&req, true, true) {
+            if (*value).borrow().matches(&req, true, true) {
                 match_found = true;
                 supported_locales.push(*value);
                 return false;
@@ -262,12 +268,12 @@ pub fn filter_matches<
         // 5) Try to match against the likely subtag without region
         req.set_region(None).unwrap();
         if let Some(req) = likely_subtags::add(&req) {
-            av_map.retain(|key, value| {
+            av_map.retain(|value| {
                 if strategy != NegotiationStrategy::Filtering && match_found {
                     return true;
                 }
 
-                if key.matches(&req, true, false) {
+                if (*value).borrow().matches(&req, true, false) {
                     match_found = true;
                     supported_locales.push(*value);
                     return false;
@@ -288,12 +294,12 @@ pub fn filter_matches<
 
         // 6) Try to match against a region as a range
         req.set_region(None).unwrap();
-        av_map.retain(|key, value| {
+        av_map.retain(|value| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
 
-            if key.matches(&req, true, true) {
+            if (*value).borrow().matches(&req, true, true) {
                 match_found = true;
                 supported_locales.push(*value);
                 return false;
@@ -316,7 +322,13 @@ pub fn filter_matches<
 pub fn negotiate_languages<
     'a,
     R: 'a + Into<LanguageIdentifier> + Clone,
-    A: 'a + Into<LanguageIdentifier> + PartialEq + Clone,
+    A: 'a
+        + Into<LanguageIdentifier>
+        + Borrow<LanguageIdentifier>
+        + PartialEq
+        + Clone
+        + std::hash::Hash
+        + std::cmp::Eq,
 >(
     requested: impl IntoIterator<Item = &'a R>,
     available: impl IntoIterator<Item = &'a A>,

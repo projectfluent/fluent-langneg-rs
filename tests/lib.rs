@@ -32,7 +32,9 @@ struct AcceptedLanguagesTestSet {
     output: Vec<String>,
 }
 
-fn read_negotiate_testsets<P: AsRef<Path>>(path: P) -> Result<Vec<NegotiateTestSet>, Box<dyn Error>> {
+fn read_negotiate_testsets<P: AsRef<Path>>(
+    path: P,
+) -> Result<Vec<NegotiateTestSet>, Box<dyn Error>> {
     let file = File::open(path)?;
     let sets = serde_json::from_reader(file)?;
     Ok(sets)
