@@ -4,6 +4,10 @@
 
   - …
 
+## fluent-locale 0.8.0 (September 10, 2019
+
+  - Update to `unic-langid` 0.5.
+
 ## fluent-locale 0.7.0 (July 30, 2019)
 
   - Update `unic-langid` to 0.4.
