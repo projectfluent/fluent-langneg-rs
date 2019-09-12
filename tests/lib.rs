@@ -7,6 +7,7 @@ use fluent_locale::convert_vec_str_to_langids_lossy;
 use fluent_locale::negotiate_languages;
 use fluent_locale::parse_accepted_languages;
 use fluent_locale::NegotiationStrategy;
+use unic_langid::langid;
 use unic_langid::LanguageIdentifier;
 use unic_locale::locale;
 
@@ -59,10 +60,9 @@ fn test_negotiate_fixtures(path: &str) {
                 let requested = convert_vec_str_to_langids_lossy(requested);
                 let available = convert_vec_str_to_langids_lossy(available);
                 let output = convert_vec_str_to_langids_lossy(test.output);
-                let output2: Vec<&LanguageIdentifier> = output.iter().map(|t| t.as_ref()).collect();
                 assert_eq!(
                     negotiate_languages(&requested, &available, None, strategy),
-                    output2,
+                    output.iter().collect::<Vec<&LanguageIdentifier>>(),
                     "Test in {} failed",
                     path
                 );
@@ -71,7 +71,6 @@ fn test_negotiate_fixtures(path: &str) {
                 let requested = convert_vec_str_to_langids_lossy(requested);
                 let available = convert_vec_str_to_langids_lossy(available);
                 let output = convert_vec_str_to_langids_lossy(test.output);
-                let output2: Vec<&LanguageIdentifier> = output.iter().map(|t| t.as_ref()).collect();
                 assert_eq!(
                     negotiate_languages(
                         &requested,
@@ -79,7 +78,7 @@ fn test_negotiate_fixtures(path: &str) {
                         default.parse().ok().as_ref(),
                         strategy
                     ),
-                    output2,
+                    output.iter().collect::<Vec<&LanguageIdentifier>>(),
                     "Test in {} failed",
                     path
                 );
@@ -131,6 +130,22 @@ fn accepted_languages() {
 }
 
 #[test]
+fn langid_matching() {
+    let loc_en_us = langid!("en-US");
+    let loc_de_at = langid!("de-AT");
+    let loc_en = langid!("en");
+    let loc_de = langid!("de");
+    let loc_pl = langid!("pl");
+
+    let requested = &[loc_en_us, loc_de_at];
+    let available = &[loc_pl, loc_de.clone(), loc_en.clone()];
+    assert_eq!(
+        negotiate_languages(requested, available, None, NegotiationStrategy::Matching),
+        &[&loc_en, &loc_de],
+    );
+}
+
+#[test]
 fn locale_matching() {
     let loc_en_us = locale!("en-US-u-hc-h12");
     let loc_de_at = locale!("de-AT-u-hc-h24");
@@ -140,11 +155,11 @@ fn locale_matching() {
 
     assert_eq!(
         negotiate_languages(
-            vec![&loc_en_us, &loc_de_at],
-            vec![&loc_pl, &loc_de, &loc_en],
+            &[loc_en_us, loc_de_at],
+            &[loc_pl, loc_de.clone(), loc_en.clone()],
             None,
             NegotiationStrategy::Matching
         ),
-        vec![&loc_en, &loc_de],
+        &[&loc_en, &loc_de],
     );
 }

@@ -119,8 +119,7 @@
 //! ```
 //!
 
-use core::borrow::Borrow;
-use std::collections::HashSet;
+use unic_langid::LangId;
 use unic_langid::LanguageIdentifier;
 mod likely_subtags;
 
@@ -133,30 +132,18 @@ pub enum NegotiationStrategy {
 
 pub fn filter_matches<
     'a,
-    R: 'a + Into<LanguageIdentifier> + Clone,
-    A: 'a
-        + Into<LanguageIdentifier>
-        + Borrow<LanguageIdentifier>
-        + Clone
-        + std::hash::Hash
-        + std::cmp::Eq,
+    R: LangId + Into<LanguageIdentifier> + Clone,
+    A: LangId + PartialEq + Clone,
 >(
-    requested: impl IntoIterator<Item = &'a R>,
-    available: impl IntoIterator<Item = &'a A>,
+    requested: &'a [R],
+    available: &'a [A],
     strategy: NegotiationStrategy,
 ) -> Vec<&'a A> {
     let mut supported_locales = vec![];
 
-    let mut av_map: HashSet<&'a A> = HashSet::new();
+    let mut available: Vec<&A> = available.into_iter().collect();
 
-    for av in available.into_iter() {
-        av_map.insert(av);
-    }
-
-    let req_langids: Vec<LanguageIdentifier> =
-        requested.into_iter().map(|a| a.clone().into()).collect();
-
-    for req in req_langids {
+    for req in requested {
         if req.get_language() == "und" {
             continue;
         }
@@ -164,12 +151,12 @@ pub fn filter_matches<
         let mut match_found = false;
 
         // 1) Try to find a simple (case-insensitive) string match for the request.
-        av_map.retain(|value| {
+        available.retain(|value| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
 
-            if (*value).borrow().matches(&req, false, false) {
+            if value.matches(req, false, false) {
                 match_found = true;
                 supported_locales.push(*value);
                 return false;
@@ -188,14 +175,14 @@ pub fn filter_matches<
         match_found = false;
 
         // 2) Try to match against the available locales treated as ranges.
-        av_map.retain(|value| {
+        available.retain(|value| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
 
-            if (*value).borrow().matches(&req, true, false) {
+            if value.matches(req, true, false) {
                 match_found = true;
-                supported_locales.push(*value);
+                supported_locales.push(value);
                 return false;
             }
             true
@@ -212,15 +199,15 @@ pub fn filter_matches<
         match_found = false;
 
         // 3) Try to match against a maximized version of the requested locale
-        let mut req = if let Some(req) = likely_subtags::add(&req) {
-            av_map.retain(|value| {
+        let mut req = if let Some(req) = likely_subtags::add(req) {
+            available.retain(|value| {
                 if strategy != NegotiationStrategy::Filtering && match_found {
                     return true;
                 }
 
-                if (*value).borrow().matches(&req, true, false) {
+                if value.matches(&req, true, false) {
                     match_found = true;
-                    supported_locales.push(*value);
+                    supported_locales.push(value);
                     return false;
                 }
                 true
@@ -237,19 +224,19 @@ pub fn filter_matches<
             match_found = false;
             req
         } else {
-            req
+            (*req).clone().into()
         };
 
         // 4) Try to match against a variant as a range
         req.set_variants(&[]).unwrap();
-        av_map.retain(|value| {
+        available.retain(|value| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
 
-            if (*value).borrow().matches(&req, true, true) {
+            if value.matches(&req, true, true) {
                 match_found = true;
-                supported_locales.push(*value);
+                supported_locales.push(value);
                 return false;
             }
             true
@@ -268,14 +255,14 @@ pub fn filter_matches<
         // 5) Try to match against the likely subtag without region
         req.set_region(None).unwrap();
         if let Some(req) = likely_subtags::add(&req) {
-            av_map.retain(|value| {
+            available.retain(|value| {
                 if strategy != NegotiationStrategy::Filtering && match_found {
                     return true;
                 }
 
-                if (*value).borrow().matches(&req, true, false) {
+                if value.matches(&req, true, false) {
                     match_found = true;
-                    supported_locales.push(*value);
+                    supported_locales.push(value);
                     return false;
                 }
                 true
@@ -294,14 +281,14 @@ pub fn filter_matches<
 
         // 6) Try to match against a region as a range
         req.set_region(None).unwrap();
-        av_map.retain(|value| {
+        available.retain(|value| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
 
-            if (*value).borrow().matches(&req, true, true) {
+            if value.matches(&req, true, true) {
                 match_found = true;
-                supported_locales.push(*value);
+                supported_locales.push(value);
                 return false;
             }
             true
@@ -321,29 +308,23 @@ pub fn filter_matches<
 
 pub fn negotiate_languages<
     'a,
-    R: 'a + Into<LanguageIdentifier> + Clone,
-    A: 'a
-        + Into<LanguageIdentifier>
-        + Borrow<LanguageIdentifier>
-        + PartialEq
-        + Clone
-        + std::hash::Hash
-        + std::cmp::Eq,
+    R: LangId + Into<LanguageIdentifier> + Clone,
+    A: LangId + PartialEq + Clone,
 >(
-    requested: impl IntoIterator<Item = &'a R>,
-    available: impl IntoIterator<Item = &'a A>,
+    requested: &'a [R],
+    available: &'a [A],
     default: Option<&'a A>,
     strategy: NegotiationStrategy,
-) -> Vec<&A> {
+) -> Vec<&'a A> {
     let mut supported = filter_matches(requested, available, strategy);
 
     if let Some(default) = default {
         if strategy == NegotiationStrategy::Lookup {
             if supported.is_empty() {
-                supported.push(default);
+                supported.push(&default);
             }
-        } else if !supported.contains(&default) {
-            supported.push(default);
+        } else if !supported.contains(&&default) {
+            supported.push(&default);
         }
     }
     supported
