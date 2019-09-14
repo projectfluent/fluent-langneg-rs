@@ -130,27 +130,21 @@ pub enum NegotiationStrategy {
     Lookup,
 }
 
-pub fn filter_matches<
-    'a,
-    R: 'a + Into<LanguageIdentifier> + Clone,
-    A: 'a + Into<LanguageIdentifier> + Clone,
->(
-    requested: impl IntoIterator<Item = &'a R>,
-    available: impl IntoIterator<Item = &'a A>,
+pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<LanguageIdentifier>>(
+    requested: &[R],
+    available: &'a [A],
     strategy: NegotiationStrategy,
 ) -> Vec<&'a A> {
     let mut supported_locales = vec![];
 
-    let mut av_map: HashMap<LanguageIdentifier, &'a A> = HashMap::new();
+    let mut av_map: HashMap<&'a LanguageIdentifier, &'a A> = HashMap::new();
 
     for av in available.into_iter() {
-        av_map.insert(av.clone().into(), av);
+        av_map.insert(av.as_ref(), av);
     }
 
-    let req_langids: Vec<LanguageIdentifier> =
-        requested.into_iter().map(|a| a.clone().into()).collect();
-
-    for req in req_langids {
+    for req in requested {
+        let req = req.as_ref();
         if req.get_language() == "und" {
             continue;
         }
@@ -206,7 +200,7 @@ pub fn filter_matches<
         match_found = false;
 
         // 3) Try to match against a maximized version of the requested locale
-        let mut req = if let Some(req) = likely_subtags::add(&req) {
+        let mut req = if let Some(req) = likely_subtags::add(req) {
             av_map.retain(|key, value| {
                 if strategy != NegotiationStrategy::Filtering && match_found {
                     return true;
@@ -231,7 +225,7 @@ pub fn filter_matches<
             match_found = false;
             req
         } else {
-            req
+            req.to_owned()
         };
 
         // 4) Try to match against a variant as a range
@@ -315,14 +309,14 @@ pub fn filter_matches<
 
 pub fn negotiate_languages<
     'a,
-    R: 'a + Into<LanguageIdentifier> + Clone,
-    A: 'a + Into<LanguageIdentifier> + PartialEq + Clone,
+    R: 'a + AsRef<LanguageIdentifier>,
+    A: 'a + AsRef<LanguageIdentifier>,
 >(
-    requested: impl IntoIterator<Item = &'a R>,
-    available: impl IntoIterator<Item = &'a A>,
+    requested: &[R],
+    available: &'a [A],
     default: Option<&'a A>,
     strategy: NegotiationStrategy,
-) -> Vec<&A> {
+) -> Vec<&'a A> {
     let mut supported = filter_matches(requested, available, strategy);
 
     if let Some(default) = default {
@@ -330,7 +324,7 @@ pub fn negotiate_languages<
             if supported.is_empty() {
                 supported.push(default);
             }
-        } else if !supported.contains(&default) {
+        } else if !supported.iter().any(|s| s.as_ref() == default.as_ref()) {
             supported.push(default);
         }
     }
