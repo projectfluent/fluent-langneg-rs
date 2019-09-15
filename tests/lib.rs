@@ -7,6 +7,7 @@ use fluent_locale::convert_vec_str_to_langids_lossy;
 use fluent_locale::negotiate_languages;
 use fluent_locale::parse_accepted_languages;
 use fluent_locale::NegotiationStrategy;
+use unic_langid::langid;
 use unic_langid::LanguageIdentifier;
 use unic_locale::locale;
 
@@ -32,7 +33,9 @@ struct AcceptedLanguagesTestSet {
     output: Vec<String>,
 }
 
-fn read_negotiate_testsets<P: AsRef<Path>>(path: P) -> Result<Vec<NegotiateTestSet>, Box<dyn Error>> {
+fn read_negotiate_testsets<P: AsRef<Path>>(
+    path: P,
+) -> Result<Vec<NegotiateTestSet>, Box<dyn Error>> {
     let file = File::open(path)?;
     let sets = serde_json::from_reader(file)?;
     Ok(sets)
@@ -57,7 +60,7 @@ fn test_negotiate_fixtures(path: &str) {
                 let requested = convert_vec_str_to_langids_lossy(requested);
                 let available = convert_vec_str_to_langids_lossy(available);
                 let output = convert_vec_str_to_langids_lossy(test.output);
-                let output2: Vec<&LanguageIdentifier> = output.iter().map(|t| t.as_ref()).collect();
+                let output2: Vec<&LanguageIdentifier> = output.iter().collect();
                 assert_eq!(
                     negotiate_languages(&requested, &available, None, strategy),
                     output2,
@@ -69,7 +72,7 @@ fn test_negotiate_fixtures(path: &str) {
                 let requested = convert_vec_str_to_langids_lossy(requested);
                 let available = convert_vec_str_to_langids_lossy(available);
                 let output = convert_vec_str_to_langids_lossy(test.output);
-                let output2: Vec<&LanguageIdentifier> = output.iter().map(|t| t.as_ref()).collect();
+                let output2: Vec<&LanguageIdentifier> = output.iter().collect();
                 assert_eq!(
                     negotiate_languages(
                         &requested,
@@ -129,6 +132,29 @@ fn accepted_languages() {
 }
 
 #[test]
+fn langid_matching() {
+    let langid_en_us = langid!("en-US");
+    let langid_de_at = langid!("de-AT");
+    let langid_en = langid!("en");
+    let langid_de = langid!("de");
+    let langid_pl = langid!("pl");
+
+    let requested = &[&langid_en_us, &langid_de_at];
+    let available = &[&langid_pl, &langid_de, &langid_en];
+    assert_eq!(
+        negotiate_languages(requested, available, None, NegotiationStrategy::Matching),
+        &[&&langid_en, &&langid_de],
+    );
+
+    let requested = &[langid_en_us, langid_de_at];
+    let available = &[langid_pl, langid_de.clone(), langid_en.clone()];
+    assert_eq!(
+        negotiate_languages(requested, available, None, NegotiationStrategy::Matching),
+        &[&langid_en, &langid_de],
+    );
+}
+
+#[test]
 fn locale_matching() {
     let loc_en_us = locale!("en-US-u-hc-h12");
     let loc_de_at = locale!("de-AT-u-hc-h24");
@@ -138,11 +164,21 @@ fn locale_matching() {
 
     assert_eq!(
         negotiate_languages(
+            &[&loc_en_us, &loc_de_at],
+            &[&loc_pl, &loc_de, &loc_en],
+            None,
+            NegotiationStrategy::Matching
+        ),
+        &[&&loc_en, &&loc_de],
+    );
+
+    assert_eq!(
+        negotiate_languages(
             &[loc_en_us, loc_de_at],
             &[loc_pl, loc_de.clone(), loc_en.clone()],
             None,
             NegotiationStrategy::Matching
         ),
-        vec![&loc_en, &loc_de],
+        &[&loc_en, &loc_de],
     );
 }

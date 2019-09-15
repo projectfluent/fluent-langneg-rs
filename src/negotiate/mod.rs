@@ -139,7 +139,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 
     let mut av_map: HashMap<&'a LanguageIdentifier, &'a A> = HashMap::new();
 
-    for av in available.into_iter() {
+    for av in available.iter() {
         av_map.insert(av.as_ref(), av);
     }
 
