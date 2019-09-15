@@ -138,8 +138,8 @@ fn locale_matching() {
 
     assert_eq!(
         negotiate_languages(
-            vec![&loc_en_us, &loc_de_at],
-            vec![&loc_pl, &loc_de, &loc_en],
+            &[loc_en_us, loc_de_at],
+            &[loc_pl, loc_de.clone(), loc_en.clone()],
             None,
             NegotiationStrategy::Matching
         ),
