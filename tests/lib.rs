@@ -155,6 +155,34 @@ fn langid_matching() {
 }
 
 #[test]
+fn cldr_feature() {
+    // In this case, the full likelySubtags algorithm knows that `mn` -> `mn-Cyrl`, but
+    // the mock doesn't.
+    #[cfg(feature = "cldr")]
+    assert_eq!(
+        negotiate_languages(
+            &[langid!("mn")],
+            &[langid!("mn-Latn"), langid!("mn-Cyrl")],
+            None,
+            NegotiationStrategy::Filtering
+        ),
+        &[&langid!("mn-Cyrl")]
+    );
+
+    // In result, the mock will just return them in order.
+    #[cfg(not(feature = "cldr"))]
+    assert_eq!(
+        negotiate_languages(
+            &[langid!("mn")],
+            &[langid!("mn-Latn"), langid!("mn-Cyrl")],
+            None,
+            NegotiationStrategy::Filtering
+        ),
+        &[&langid!("mn-Latn"), &langid!("mn-Cyrl")]
+    );
+}
+
+#[test]
 fn locale_matching() {
     let loc_en_us = locale!("en-US-u-hc-h12");
     let loc_de_at = locale!("de-AT-u-hc-h24");
