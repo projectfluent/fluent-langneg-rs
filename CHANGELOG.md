@@ -4,7 +4,12 @@
 
   - …
 
-## fluent-locale 0.8.0 (September 10, 2019
+## fluent-locale 0.9.0 (October 1, 2019)
+
+  - Use AsRef as bounds in negotiation.
+  - Support unic-langid with full CLDR backed likelysubtags behind "cldr" feature.
+
+## fluent-locale 0.8.0 (September 10, 2019)
 
   - Update to `unic-langid` 0.5.
 
