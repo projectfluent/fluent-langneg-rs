@@ -121,7 +121,11 @@
 
 use std::collections::HashMap;
 use unic_langid::LanguageIdentifier;
+
+#[cfg(not(feature = "cldr"))]
 mod likely_subtags;
+#[cfg(not(feature = "cldr"))]
+use likely_subtags::MockLikelySubtags;
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum NegotiationStrategy {
@@ -144,7 +148,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
     }
 
     for req in requested {
-        let req = req.as_ref();
+        let mut req = req.as_ref().to_owned();
         if req.get_language() == "und" {
             continue;
         }
@@ -200,7 +204,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
         match_found = false;
 
         // 3) Try to match against a maximized version of the requested locale
-        let mut req = if let Some(req) = likely_subtags::add(req) {
+        if req.add_likely_subtags() {
             av_map.retain(|key, value| {
                 if strategy != NegotiationStrategy::Filtering && match_found {
                     return true;
@@ -223,9 +227,6 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
             }
 
             match_found = false;
-            req
-        } else {
-            req.to_owned()
         };
 
         // 4) Try to match against a variant as a range
@@ -255,7 +256,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 
         // 5) Try to match against the likely subtag without region
         req.set_region(None).unwrap();
-        if let Some(req) = likely_subtags::add(&req) {
+        if req.add_likely_subtags() {
             av_map.retain(|key, value| {
                 if strategy != NegotiationStrategy::Filtering && match_found {
                     return true;
