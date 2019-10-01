@@ -169,7 +169,8 @@ fn cldr_feature() {
         &[&langid!("mn-Cyrl")]
     );
 
-    // In result, the mock will just return them in order.
+    // In result, the mock will just return both in undefined
+    // order.
     #[cfg(not(feature = "cldr"))]
     assert_eq!(
         negotiate_languages(
@@ -177,8 +178,8 @@ fn cldr_feature() {
             &[langid!("mn-Latn"), langid!("mn-Cyrl")],
             None,
             NegotiationStrategy::Filtering
-        ),
-        &[&langid!("mn-Latn"), &langid!("mn-Cyrl")]
+        ).len(),
+        2
     );
 }
 
