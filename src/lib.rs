@@ -24,7 +24,7 @@ pub use negotiate::NegotiationStrategy;
 
 pub fn convert_vec_str_to_langids<'a, I, J>(
     input: I,
-) -> Result<Vec<unic_langid::LanguageIdentifier>, unic_langid::errors::LanguageIdentifierError>
+) -> Result<Vec<unic_langid::LanguageIdentifier>, unic_langid::LanguageIdentifierError>
 where
     I: IntoIterator<Item = J>,
     J: AsRef<str> + 'a,
