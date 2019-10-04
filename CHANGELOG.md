@@ -4,6 +4,10 @@
 
   - …
 
+## fluent-locale 0.10.0 (October 3, 2019)
+
+  - Update to `unic-langid` 0.6.
+
 ## fluent-locale 0.9.0 (October 1, 2019)
 
   - Use AsRef as bounds in negotiation.
