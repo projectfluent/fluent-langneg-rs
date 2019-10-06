@@ -11,7 +11,7 @@ Introduction
 
 This is a Rust implementation of fluent-locale library which is a part of Project Fluent.
 
-The library uses [unic-langid](https://github.com/zbraniecki/unic-locale) and [unic-locale](https://github.com/zbraniecki/unic-locale) to retrieve and operate on Unicde Language and Locale Identifiers.
+The library uses [unic-langid](https://github.com/zbraniecki/unic-locale) and [unic-locale](https://github.com/zbraniecki/unic-locale) to retrieve and operate on Unicode Language and Locale Identifiers.
 The library provides algorithm for negotiating between lists of locales.
 
 Usage
