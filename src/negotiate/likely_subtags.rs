@@ -23,7 +23,7 @@ impl MockLikelySubtags for LanguageIdentifier {
 
                 for subtag in REGION_MATCHING_KEYS {
                     if lang == *subtag {
-                        self.set_region(Some(subtag)).unwrap();
+                        self.set_region(subtag).unwrap();
                         return true;
                     }
                 }
@@ -31,9 +31,17 @@ impl MockLikelySubtags for LanguageIdentifier {
             }
         };
         let langid: LanguageIdentifier = extended.parse().expect("Failed to parse langid.");
-        self.set_language(Some(langid.get_language())).unwrap();
-        self.set_script(langid.get_script()).unwrap();
-        self.set_region(langid.get_region()).unwrap();
+        self.set_language(langid.get_language()).unwrap();
+        if let Some(subtag) = langid.get_script() {
+            self.set_script(subtag).unwrap();
+        } else {
+            self.clear_script();
+        }
+        if let Some(subtag) = langid.get_region() {
+            self.set_region(subtag).unwrap();
+        } else {
+            self.clear_region();
+        }
         return true;
     }
 }

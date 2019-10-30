@@ -230,7 +230,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
         };
 
         // 4) Try to match against a variant as a range
-        req.set_variants(&[]).unwrap();
+        req.clear_variants();
         av_map.retain(|key, value| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
@@ -255,7 +255,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
         match_found = false;
 
         // 5) Try to match against the likely subtag without region
-        req.set_region(None).unwrap();
+        req.clear_region();
         if req.add_likely_subtags() {
             av_map.retain(|key, value| {
                 if strategy != NegotiationStrategy::Filtering && match_found {
@@ -282,7 +282,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
         }
 
         // 6) Try to match against a region as a range
-        req.set_region(None).unwrap();
+        req.clear_region();
         av_map.retain(|key, value| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
