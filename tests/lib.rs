@@ -178,7 +178,8 @@ fn cldr_feature() {
             &[langid!("mn-Latn"), langid!("mn-Cyrl")],
             None,
             NegotiationStrategy::Filtering
-        ).len(),
+        )
+        .len(),
         2
     );
 }

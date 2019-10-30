@@ -42,6 +42,6 @@ impl MockLikelySubtags for LanguageIdentifier {
         } else {
             self.clear_region();
         }
-        return true;
+        true
     }
 }

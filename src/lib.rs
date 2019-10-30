@@ -29,11 +29,7 @@ where
     I: IntoIterator<Item = J>,
     J: AsRef<str> + 'a,
 {
-    let mut result = vec![];
-    for elem in input.into_iter() {
-        result.push(elem.as_ref().parse()?);
-    }
-    Ok(result)
+    input.into_iter().map(|s| s.as_ref().parse()).collect()
 }
 
 pub fn convert_vec_str_to_langids_lossy<'a, I, J>(input: I) -> Vec<unic_langid::LanguageIdentifier>

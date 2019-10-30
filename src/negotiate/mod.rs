@@ -119,7 +119,6 @@
 //! ```
 //!
 
-use std::collections::HashMap;
 use unic_langid::LanguageIdentifier;
 
 #[cfg(not(feature = "cldr"))]
@@ -141,11 +140,8 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 ) -> Vec<&'a A> {
     let mut supported_locales = vec![];
 
-    let mut av_map: HashMap<&'a LanguageIdentifier, &'a A> = HashMap::new();
-
-    for av in available.iter() {
-        av_map.insert(av.as_ref(), av);
-    }
+    let mut available_locales: Vec<(&LanguageIdentifier, &A)> =
+        available.iter().map(|a| (a.as_ref(), a)).collect();
 
     for req in requested {
         let mut req = req.as_ref().to_owned();
@@ -156,7 +152,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
         let mut match_found = false;
 
         // 1) Try to find a simple (case-insensitive) string match for the request.
-        av_map.retain(|key, value| {
+        available_locales.retain(|(key, value)| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
@@ -180,7 +176,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
         match_found = false;
 
         // 2) Try to match against the available locales treated as ranges.
-        av_map.retain(|key, value| {
+        available_locales.retain(|(key, value)| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
@@ -205,7 +201,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 
         // 3) Try to match against a maximized version of the requested locale
         if req.add_likely_subtags() {
-            av_map.retain(|key, value| {
+            available_locales.retain(|(key, value)| {
                 if strategy != NegotiationStrategy::Filtering && match_found {
                     return true;
                 }
@@ -231,7 +227,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 
         // 4) Try to match against a variant as a range
         req.clear_variants();
-        av_map.retain(|key, value| {
+        available_locales.retain(|(key, value)| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
@@ -257,7 +253,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
         // 5) Try to match against the likely subtag without region
         req.clear_region();
         if req.add_likely_subtags() {
-            av_map.retain(|key, value| {
+            available_locales.retain(|(key, value)| {
                 if strategy != NegotiationStrategy::Filtering && match_found {
                     return true;
                 }
@@ -283,7 +279,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 
         // 6) Try to match against a region as a range
         req.clear_region();
-        av_map.retain(|key, value| {
+        available_locales.retain(|(key, value)| {
             if strategy != NegotiationStrategy::Filtering && match_found {
                 return true;
             }
@@ -311,7 +307,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 pub fn negotiate_languages<
     'a,
     R: 'a + AsRef<LanguageIdentifier>,
-    A: 'a + AsRef<LanguageIdentifier>,
+    A: 'a + AsRef<LanguageIdentifier> + PartialEq,
 >(
     requested: &[R],
     available: &'a [A],
@@ -325,7 +321,7 @@ pub fn negotiate_languages<
             if supported.is_empty() {
                 supported.push(default);
             }
-        } else if !supported.iter().any(|s| s.as_ref() == default.as_ref()) {
+        } else if !supported.contains(&default) {
             supported.push(default);
         }
     }
