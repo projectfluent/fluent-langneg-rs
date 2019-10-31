@@ -22,23 +22,28 @@ pub use accepted_languages::parse as parse_accepted_languages;
 pub use negotiate::negotiate_languages;
 pub use negotiate::NegotiationStrategy;
 
+use unic_langid::{LanguageIdentifier, LanguageIdentifierError};
+
 pub fn convert_vec_str_to_langids<'a, I, J>(
     input: I,
-) -> Result<Vec<unic_langid::LanguageIdentifier>, unic_langid::LanguageIdentifierError>
+) -> Result<Vec<LanguageIdentifier>, LanguageIdentifierError>
 where
     I: IntoIterator<Item = J>,
-    J: AsRef<str> + 'a,
-{
-    input.into_iter().map(|s| s.as_ref().parse()).collect()
-}
-
-pub fn convert_vec_str_to_langids_lossy<'a, I, J>(input: I) -> Vec<unic_langid::LanguageIdentifier>
-where
-    I: IntoIterator<Item = J>,
-    J: AsRef<str> + 'a,
+    J: AsRef<[u8]> + 'a,
 {
     input
         .into_iter()
-        .filter_map(|t| t.as_ref().parse().ok())
+        .map(|s| LanguageIdentifier::from_bytes(s.as_ref()))
+        .collect()
+}
+
+pub fn convert_vec_str_to_langids_lossy<'a, I, J>(input: I) -> Vec<LanguageIdentifier>
+where
+    I: IntoIterator<Item = J>,
+    J: AsRef<[u8]> + 'a,
+{
+    input
+        .into_iter()
+        .filter_map(|t| LanguageIdentifier::from_bytes(t.as_ref()).ok())
         .collect()
 }
