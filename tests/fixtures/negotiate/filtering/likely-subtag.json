@@ -34,5 +34,9 @@
   {
     "input": [["sr-RU"], ["sr-Latn-RO", "sr-Cyrl"]],
     "output": ["sr-Latn-RO"]
+  },
+  {
+    "input": [["en-CA"], ["en-ZA", "en-GB", "en-US"]],
+    "output": ["en-US", "en-ZA", "en-GB"]
   }
 ]
