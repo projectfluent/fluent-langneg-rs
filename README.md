@@ -1,15 +1,15 @@
-# Fluent Locale
+# Fluent LangNeg
 
-**Fluent Locale is a library for language and locale identifier negotiation.**
+**Fluent LangNeg is a library for language and locale identifier negotiation.**
 
-[![crates.io](http://meritbadge.herokuapp.com/fluent-locale)](https://crates.io/crates/fluent-locale)
-[![Build Status](https://travis-ci.org/projectfluent/fluent-locale-rs.svg?branch=master)](https://travis-ci.org/projectfluent/fluent-locale-rs)
-[![Coverage Status](https://coveralls.io/repos/github/projectfluent/fluent-locale-rs/badge.svg?branch=master)](https://coveralls.io/github/projectfluent/fluent-locale-rs?branch=master)
+[![crates.io](http://meritbadge.herokuapp.com/fluent-langneg)](https://crates.io/crates/fluent-langneg)
+[![Build Status](https://travis-ci.org/projectfluent/fluent-langneg-rs.svg?branch=master)](https://travis-ci.org/projectfluent/fluent-langneg-rs)
+[![Coverage Status](https://coveralls.io/repos/github/projectfluent/fluent-langneg-rs/badge.svg?branch=master)](https://coveralls.io/github/projectfluent/fluent-langneg-rs?branch=master)
 
 Introduction
 ------------
 
-This is a Rust implementation of fluent-locale library which is a part of Project Fluent.
+This is a Rust implementation of fluent-langneg library which is a part of Project Fluent.
 
 The library uses [unic-langid](https://github.com/zbraniecki/unic-locale) and [unic-locale](https://github.com/zbraniecki/unic-locale) to retrieve and operate on Unicode Language and Locale Identifiers.
 The library provides algorithm for negotiating between lists of locales.
@@ -18,9 +18,9 @@ Usage
 -----
 
 ```rust
-use fluent_locale::negotiate_languages;
-use fluent_locale::NegotiationStrategy;
-use fluent_locale::convert_vec_str_to_langids_lossy;
+use fluent_langneg::negotiate_languages;
+use fluent_langneg::NegotiationStrategy;
+use fluent_langneg::convert_vec_str_to_langids_lossy;
 use unic_langid::LanguageIdentifier
 
 // Since langid parsing from string is fallible, we'll use a helper
@@ -43,18 +43,15 @@ assert_eq!(supported,
 
 See [docs.rs][] for more examples.
 
-[docs.rs]: https://docs.rs/fluent-locale/
+[docs.rs]: https://docs.rs/fluent-langneg/
 
 Status
 ------
 
-The implementation is in early stage, but is complete according to fluent-locale
+The implementation is complete according to fluent-langneg
 corpus of tests, which means that it parses, serializes and negotiates as expected.
 
 The negotiation methods can operate on lists of `LanguageIdentifier` or `Locale`.
-
-The ergonomics of Rust API can be improved, since the fallible nature of language identifier
-parsing makes operating on lists of them tedious.
 
 The remaining work is on the path to 1.0 is to gain in-field experience of using it,
 add more tests and ensure that bad input is correctly handled.
@@ -84,7 +81,6 @@ implementations of language negotiation algorithms which may choose different
 tradeoffs.
 
 [BCP47]: https://tools.ietf.org/html/bcp47
-[Intl.Locale]: https://github.com/tc39/proposal-intl-locale
 [RFC6067]: https://www.ietf.org/rfc/rfc6067.txt
 [UTS 35]: http://www.unicode.org/reports/tr35/#Locale_Extension_Key_and_Type_Data
 [RFC4647]: https://tools.ietf.org/html/rfc4647
@@ -105,16 +101,7 @@ For such purposes, [rust-language-tags][] crate seems to be a better choice.
 Performance
 -----------
 
-There has not been a significant performance work being done on the library yet,
-so we expect there are some low hanging fruit waiting for someone to find them.
-
-At the moment performance is comparable to previously mentioned `language-tags` crate
-for parsing a sample list of language tags based on this crate's benchmark code:
-
-
-    running 2 tests
-    test bench_locale(fluent-locale)  ... bench:       1,773 ns/iter (+/- 48)
-    test bench_locale(language-tags) ... bench:       1,982 ns/iter (+/- 280)
+The crate is considered to be fully optimized for production.
 
 
 Develop

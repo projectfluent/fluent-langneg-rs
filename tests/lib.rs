@@ -3,10 +3,10 @@ use std::fs;
 use std::fs::File;
 use std::path::Path;
 
-use fluent_locale::convert_vec_str_to_langids_lossy;
-use fluent_locale::negotiate_languages;
-use fluent_locale::parse_accepted_languages;
-use fluent_locale::NegotiationStrategy;
+use fluent_langneg::convert_vec_str_to_langids_lossy;
+use fluent_langneg::negotiate_languages;
+use fluent_langneg::parse_accepted_languages;
+use fluent_langneg::NegotiationStrategy;
 use unic_langid::langid;
 use unic_langid::LanguageIdentifier;
 use unic_locale::locale;

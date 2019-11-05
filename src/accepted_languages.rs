@@ -4,10 +4,10 @@
 //! # Example:
 //!
 //! ```
-//! use fluent_locale::negotiate_languages;
-//! use fluent_locale::NegotiationStrategy;
-//! use fluent_locale::parse_accepted_languages;
-//! use fluent_locale::convert_vec_str_to_langids_lossy;
+//! use fluent_langneg::negotiate_languages;
+//! use fluent_langneg::NegotiationStrategy;
+//! use fluent_langneg::parse_accepted_languages;
+//! use fluent_langneg::convert_vec_str_to_langids_lossy;
 //! use unic_langid::LanguageIdentifier;
 //!
 //! let requested = parse_accepted_languages("de-AT;0.9,de-DE;0.8,de;0.7;en-US;0.5");

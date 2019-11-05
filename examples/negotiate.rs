@@ -1,5 +1,5 @@
-use fluent_locale::negotiate::NegotiationStrategy;
-use fluent_locale::{convert_vec_str_to_langids_lossy, negotiate_languages};
+use fluent_langneg::negotiate::NegotiationStrategy;
+use fluent_langneg::{convert_vec_str_to_langids_lossy, negotiate_languages};
 
 fn main() {
     let requested = convert_vec_str_to_langids_lossy(&["it", "pl", "ru"]);

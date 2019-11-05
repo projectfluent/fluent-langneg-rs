@@ -2,8 +2,8 @@ use criterion::criterion_group;
 use criterion::criterion_main;
 use criterion::Criterion;
 
-use fluent_locale::convert_vec_str_to_langids_lossy;
-use fluent_locale::negotiate_languages;
+use fluent_langneg::convert_vec_str_to_langids_lossy;
+use fluent_langneg::negotiate_languages;
 
 fn negotiate_bench(c: &mut Criterion) {
     let requested = &["de", "it", "ru"];
@@ -21,7 +21,7 @@ fn negotiate_bench(c: &mut Criterion) {
                 &requested,
                 &available,
                 None,
-                fluent_locale::NegotiationStrategy::Filtering,
+                fluent_langneg::NegotiationStrategy::Filtering,
             );
         })
     });
