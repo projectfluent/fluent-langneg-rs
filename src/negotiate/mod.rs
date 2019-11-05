@@ -223,7 +223,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
             }
 
             match_found = false;
-        };
+        }
 
         // 4) Try to match against a variant as a range
         req.clear_variants();
