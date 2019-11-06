@@ -140,8 +140,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 ) -> Vec<&'a A> {
     let mut supported_locales = vec![];
 
-    let mut available_locales: Vec<(&LanguageIdentifier, &A)> =
-        available.iter().map(|a| (a.as_ref(), a)).collect();
+    let mut available_locales: Vec<&A> = available.iter().collect();
 
     for req in requested {
         let mut req = req.as_ref().to_owned();
@@ -149,156 +148,59 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
             continue;
         }
 
-        let mut match_found = false;
+        macro_rules! test_strategy {
+            ($self_as_range:expr, $other_as_range:expr) => {{
+                let mut match_found = false;
+                available_locales.retain(|locale| {
+                    if strategy != NegotiationStrategy::Filtering && match_found {
+                        return true;
+                    }
+
+                    if locale
+                        .as_ref()
+                        .matches(&req, $self_as_range, $other_as_range)
+                    {
+                        match_found = true;
+                        supported_locales.push(*locale);
+                        return false;
+                    }
+                    true
+                });
+
+                if match_found {
+                    match strategy {
+                        NegotiationStrategy::Filtering => {}
+                        NegotiationStrategy::Matching => continue,
+                        NegotiationStrategy::Lookup => break,
+                    }
+                }
+            }};
+        }
 
         // 1) Try to find a simple (case-insensitive) string match for the request.
-        available_locales.retain(|(key, value)| {
-            if strategy != NegotiationStrategy::Filtering && match_found {
-                return true;
-            }
-
-            if key.matches(&req, false, false) {
-                match_found = true;
-                supported_locales.push(*value);
-                return false;
-            }
-            true
-        });
-
-        if match_found {
-            match strategy {
-                NegotiationStrategy::Filtering => {}
-                NegotiationStrategy::Matching => continue,
-                NegotiationStrategy::Lookup => break,
-            }
-        }
-
-        match_found = false;
+        test_strategy!(false, false);
 
         // 2) Try to match against the available locales treated as ranges.
-        available_locales.retain(|(key, value)| {
-            if strategy != NegotiationStrategy::Filtering && match_found {
-                return true;
-            }
-
-            if key.matches(&req, true, false) {
-                match_found = true;
-                supported_locales.push(*value);
-                return false;
-            }
-            true
-        });
-
-        if match_found {
-            match strategy {
-                NegotiationStrategy::Filtering => {}
-                NegotiationStrategy::Matching => continue,
-                NegotiationStrategy::Lookup => break,
-            };
-        }
-
-        match_found = false;
+        test_strategy!(true, false);
 
         // 3) Try to match against a maximized version of the requested locale
         if req.add_likely_subtags() {
-            available_locales.retain(|(key, value)| {
-                if strategy != NegotiationStrategy::Filtering && match_found {
-                    return true;
-                }
-
-                if key.matches(&req, true, false) {
-                    match_found = true;
-                    supported_locales.push(*value);
-                    return false;
-                }
-                true
-            });
-
-            if match_found {
-                match strategy {
-                    NegotiationStrategy::Filtering => {}
-                    NegotiationStrategy::Matching => continue,
-                    NegotiationStrategy::Lookup => break,
-                };
-            }
-
-            match_found = false;
+            test_strategy!(true, false);
         }
 
         // 4) Try to match against a variant as a range
         req.clear_variants();
-        available_locales.retain(|(key, value)| {
-            if strategy != NegotiationStrategy::Filtering && match_found {
-                return true;
-            }
-
-            if key.matches(&req, true, true) {
-                match_found = true;
-                supported_locales.push(*value);
-                return false;
-            }
-            true
-        });
-
-        if match_found {
-            match strategy {
-                NegotiationStrategy::Filtering => {}
-                NegotiationStrategy::Matching => continue,
-                NegotiationStrategy::Lookup => break,
-            };
-        }
-
-        match_found = false;
+        test_strategy!(true, true);
 
         // 5) Try to match against the likely subtag without region
         req.clear_region();
         if req.add_likely_subtags() {
-            available_locales.retain(|(key, value)| {
-                if strategy != NegotiationStrategy::Filtering && match_found {
-                    return true;
-                }
-
-                if key.matches(&req, true, false) {
-                    match_found = true;
-                    supported_locales.push(*value);
-                    return false;
-                }
-                true
-            });
-
-            if match_found {
-                match strategy {
-                    NegotiationStrategy::Filtering => {}
-                    NegotiationStrategy::Matching => continue,
-                    NegotiationStrategy::Lookup => break,
-                };
-            }
-
-            match_found = false;
+            test_strategy!(true, false);
         }
 
         // 6) Try to match against a region as a range
         req.clear_region();
-        available_locales.retain(|(key, value)| {
-            if strategy != NegotiationStrategy::Filtering && match_found {
-                return true;
-            }
-
-            if key.matches(&req, true, true) {
-                match_found = true;
-                supported_locales.push(*value);
-                return false;
-            }
-            true
-        });
-
-        if match_found {
-            match strategy {
-                NegotiationStrategy::Filtering => {}
-                NegotiationStrategy::Matching => continue,
-                NegotiationStrategy::Lookup => break,
-            };
-        }
+        test_strategy!(true, true);
     }
 
     supported_locales
