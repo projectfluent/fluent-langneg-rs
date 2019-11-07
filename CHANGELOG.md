@@ -4,6 +4,14 @@
 
   - …
 
+## fluent-langneg 0.11.0 (November 7, 2019)
+
+  - Change name to `fluent-langneg` to better reflect the purpose.
+  - Update to `unic-langid` 0.7.
+  - Include feature "cldr" to use full CLDR likely-subtags.
+  - Improved performance by 50% in the default case, and by further 34% when using CLDR feature.
+  - Accept `AsRef<[u8]>` instead of `AsRef<str>`.
+
 ## fluent-locale 0.10.0 (October 3, 2019)
 
   - Update to `unic-langid` 0.6.
