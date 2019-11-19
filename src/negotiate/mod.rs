@@ -144,10 +144,6 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 
     for req in requested {
         let mut req = req.as_ref().to_owned();
-        if req.get_language() == "und" {
-            continue;
-        }
-
         macro_rules! test_strategy {
             ($self_as_range:expr, $other_as_range:expr) => {{
                 let mut match_found = false;
@@ -182,6 +178,12 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 
         // 2) Try to match against the available locales treated as ranges.
         test_strategy!(true, false);
+
+        // Per Unicode TR35, 4.4 Locale Matching, we don't add likely subtags to
+        // requested locales, so we'll skip it from the rest of the steps.
+        if req.get_language() == "und" {
+            continue;
+        }
 
         // 3) Try to match against a maximized version of the requested locale
         if req.add_likely_subtags() {

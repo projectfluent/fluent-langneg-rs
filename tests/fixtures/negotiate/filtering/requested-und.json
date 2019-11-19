@@ -2,5 +2,9 @@
   {
     "input": [["und"], ["de", "pl-PL", "it", "fr-Latn-CA", "ru"]],
     "output": []
+  },
+  {
+    "input": [["und"], ["und", "en-US"], "en-US"],
+    "output": ["und", "en-US"]
   }
 ]
