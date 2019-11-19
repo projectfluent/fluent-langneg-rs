@@ -4,6 +4,10 @@
 
   - …
 
+## fluent-langneg 0.11.1 (November 17, 2019)
+
+  - Improve handling of `und` in requested to match Unicode TR35.
+
 ## fluent-langneg 0.11.0 (November 7, 2019)
 
   - Change name to `fluent-langneg` to better reflect the purpose.
