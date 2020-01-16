@@ -141,14 +141,20 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
     let mut supported_locales = vec![];
 
     let mut available_locales: Vec<&A> = available.iter().collect();
+    let requested_locales: Vec<&LanguageIdentifier> =
+        requested.iter().map(|r| r.as_ref()).collect();
 
-    for req in requested {
-        let mut req = req.as_ref().to_owned();
+    for (idx, req) in requested_locales.iter().enumerate() {
+        let mut req = (*req).to_owned();
         macro_rules! test_strategy {
-            ($self_as_range:expr, $other_as_range:expr) => {{
+            ($self_as_range:expr, $other_as_range:expr, $exact_match:expr) => {{
                 let mut match_found = false;
                 available_locales.retain(|locale| {
                     if strategy != NegotiationStrategy::Filtering && match_found {
+                        return true;
+                    }
+
+                    if !$exact_match && requested_locales[idx + 1..].contains(&locale.as_ref()) {
                         return true;
                     }
 
@@ -174,10 +180,10 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
         }
 
         // 1) Try to find a simple (case-insensitive) string match for the request.
-        test_strategy!(false, false);
+        test_strategy!(false, false, true);
 
         // 2) Try to match against the available locales treated as ranges.
-        test_strategy!(true, false);
+        test_strategy!(true, false, false);
 
         // Per Unicode TR35, 4.4 Locale Matching, we don't add likely subtags to
         // requested locales, so we'll skip it from the rest of the steps.
@@ -187,22 +193,22 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 
         // 3) Try to match against a maximized version of the requested locale
         if req.add_likely_subtags() {
-            test_strategy!(true, false);
+            test_strategy!(true, false, false);
         }
 
         // 4) Try to match against a variant as a range
         req.clear_variants();
-        test_strategy!(true, true);
+        test_strategy!(true, true, false);
 
         // 5) Try to match against the likely subtag without region
         req.clear_region();
         if req.add_likely_subtags() {
-            test_strategy!(true, false);
+            test_strategy!(true, false, false);
         }
 
         // 6) Try to match against a region as a range
         req.clear_region();
-        test_strategy!(true, true);
+        test_strategy!(true, true, false);
     }
 
     supported_locales
