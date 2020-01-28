@@ -181,7 +181,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 
         // Per Unicode TR35, 4.4 Locale Matching, we don't add likely subtags to
         // requested locales, so we'll skip it from the rest of the steps.
-        if req.get_language() == "und" {
+        if req.language() == "und" {
             continue;
         }
 

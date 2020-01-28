@@ -4,6 +4,10 @@
 
   - …
 
+## fluent-langneg 0.12.0 (January 28, 2020)
+
+ - Update `unic-langid` to 0.8.
+
 ## fluent-langneg 0.11.1 (November 17, 2019)
 
   - Improve handling of `und` in requested to match Unicode TR35.
