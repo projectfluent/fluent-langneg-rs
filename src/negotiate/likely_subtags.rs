@@ -5,11 +5,11 @@ static REGION_MATCHING_KEYS: &[&str] = &[
 ];
 
 pub trait MockLikelySubtags {
-    fn add_likely_subtags(&mut self) -> bool;
+    fn maximize(&mut self) -> bool;
 }
 
 impl MockLikelySubtags for LanguageIdentifier {
-    fn add_likely_subtags(&mut self) -> bool {
+    fn maximize(&mut self) -> bool {
         let extended = match self.to_string().as_str() {
             "en" => "en-Latn-US",
             "fr" => "fr-Latn-FR",

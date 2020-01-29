@@ -186,7 +186,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
         }
 
         // 3) Try to match against a maximized version of the requested locale
-        if req.add_likely_subtags() {
+        if req.maximize() {
             test_strategy!(true, false);
         }
 
@@ -196,7 +196,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 
         // 5) Try to match against the likely subtag without region
         req.clear_region();
-        if req.add_likely_subtags() {
+        if req.maximize() {
             test_strategy!(true, false);
         }
 
