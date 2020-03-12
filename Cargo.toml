@@ -11,6 +11,12 @@ repository = "https://github.com/projectfluent/fluent-langneg-rs"
 readme = "README.md"
 categories = ["internationalization", "localization"]
 edition = "2018"
+include = [
+	"src/**/*",
+	"benches/*.rs",
+	"Cargo.toml",
+	"README.md"
+]
 
 [badges]
 travis-ci = { repository = "projectfluent/fluent-langneg-rs" }
