@@ -4,6 +4,10 @@
 
   - …
 
+## fluent-langneg 0.13.0 (May 6, 2020)
+
+ - Update `unic-langid` to 0.9.
+
 ## fluent-langneg 0.12.1 (January 29, 2020)
 
  - Fixing `maximize` calls in negotiation.
