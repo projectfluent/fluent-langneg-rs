@@ -2,7 +2,7 @@
 
 **Fluent LangNeg is a library for language and locale identifier negotiation.**
 
-[![crates.io](http://meritbadge.herokuapp.com/fluent-langneg)](https://crates.io/crates/fluent-langneg)
+[![crates.io](https://img.shields.io/crates/v/fluent-langneg.svg)](https://crates.io/crates/fluent-langneg)
 [![Build Status](https://travis-ci.org/projectfluent/fluent-langneg-rs.svg?branch=master)](https://travis-ci.org/projectfluent/fluent-langneg-rs)
 [![Coverage Status](https://coveralls.io/repos/github/projectfluent/fluent-langneg-rs/badge.svg?branch=master)](https://coveralls.io/github/projectfluent/fluent-langneg-rs?branch=master)
 
