@@ -167,39 +167,40 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 
     let mut available_locales: Vec<&A> = available.iter().collect();
 
+    macro_rules! test_strategy {
+        ($req:ident, $self_as_range:expr, $other_as_range:expr) => {{
+            let mut match_found = false;
+            available_locales.retain(|locale| {
+                if strategy != NegotiationStrategy::Filtering && match_found {
+                    return true;
+                }
+
+                if matches(locale.as_ref(), &$req, $self_as_range, $other_as_range) {
+                    match_found = true;
+                    supported_locales.push(*locale);
+                    return false;
+                }
+                true
+            });
+
+            if match_found {
+                match strategy {
+                    NegotiationStrategy::Filtering => {}
+                    NegotiationStrategy::Matching => continue,
+                    NegotiationStrategy::Lookup => break,
+                }
+            }
+        }};
+    }
+
     for req in requested {
         let req = req.as_ref();
-        macro_rules! test_strategy {
-            ($self_as_range:expr, $other_as_range:expr) => {{
-                let mut match_found = false;
-                available_locales.retain(|locale| {
-                    if strategy != NegotiationStrategy::Filtering && match_found {
-                        return true;
-                    }
-
-                    if matches(locale.as_ref(), &req, $self_as_range, $other_as_range) {
-                        match_found = true;
-                        supported_locales.push(*locale);
-                        return false;
-                    }
-                    true
-                });
-
-                if match_found {
-                    match strategy {
-                        NegotiationStrategy::Filtering => {}
-                        NegotiationStrategy::Matching => continue,
-                        NegotiationStrategy::Lookup => break,
-                    }
-                }
-            }};
-        }
 
         // 1) Try to find a simple (case-insensitive) string match for the request.
-        test_strategy!(false, false);
+        test_strategy!(req, false, false);
 
         // 2) Try to match against the available locales treated as ranges.
-        test_strategy!(true, false);
+        test_strategy!(req, true, false);
 
         // Per Unicode TR35, 4.4 Locale Matching, we don't add likely subtags to
         // requested locales, so we'll skip it from the rest of the steps.
@@ -210,22 +211,22 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
         let mut req = req.to_owned();
         // 3) Try to match against a maximized version of the requested locale
         if req.maximize() {
-            test_strategy!(true, false);
+            test_strategy!(req, true, false);
         }
 
         // 4) Try to match against a variant as a range
         req.variants.clear();
-        test_strategy!(true, true);
+        test_strategy!(req, true, true);
 
         // 5) Try to match against the likely subtag without region
         req.region = None;
         if req.maximize() {
-            test_strategy!(true, false);
+            test_strategy!(req, true, false);
         }
 
         // 6) Try to match against a region as a range
         req.region = None;
-        test_strategy!(true, true);
+        test_strategy!(req, true, true);
     }
 
     supported_locales
