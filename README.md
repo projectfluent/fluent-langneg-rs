@@ -11,7 +11,7 @@ Introduction
 
 This is a Rust implementation of fluent-langneg library which is a part of Project Fluent.
 
-The library uses [unic-langid](https://github.com/zbraniecki/unic-locale) and [unic-locale](https://github.com/zbraniecki/unic-locale) to retrieve and operate on Unicode Language and Locale Identifiers.
+The library uses [icu-locid](https://github.com/unicode-org/icu4x) to retrieve and operate on Unicode Language and Locale Identifiers.
 The library provides algorithm for negotiating between lists of locales.
 
 Usage
@@ -21,13 +21,14 @@ Usage
 use fluent_langneg::negotiate_languages;
 use fluent_langneg::NegotiationStrategy;
 use fluent_langneg::convert_vec_str_to_langids_lossy;
-use unic_langid::LanguageIdentifier
+use fluent_langneg::LanguageIdentifier;
 
 // Since langid parsing from string is fallible, we'll use a helper
 // function which strips any langids that failed to parse.
 let requested = convert_vec_str_to_langids_lossy(&["de-DE", "fr-FR", "en-US"]);
 let available = convert_vec_str_to_langids_lossy(&["it", "fr", "de-AT", "fr-CA", "en-US"]);
-let default: LanguageIdentifier = "en-US".parse().expect("Parsing langid failed.");
+let default: LanguageIdentifier = "en-US".parse()
+    .expect("Parsing langid failed.");
 
 let supported = negotiate_languages(
   &requested,
