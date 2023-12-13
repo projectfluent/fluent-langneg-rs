@@ -144,6 +144,7 @@ fn subtag_matches<P: PartialEq>(
     (as_range1 && subtag1.is_none()) || (as_range2 && subtag2.is_none()) || subtag1 == subtag2
 }
 
+#[inline]
 fn matches(
     lid1: &LanguageIdentifier,
     lid2: &LanguageIdentifier,
@@ -165,7 +166,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
     available: &'a [A],
     strategy: NegotiationStrategy,
 ) -> Vec<&'a A> {
-    let lc = LocaleExpander::new();
+    let mut lc: Option<LocaleExpander> = None;
 
     let mut supported_locales = vec![];
 
@@ -214,6 +215,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 
         let mut req = req.to_owned();
         // 3) Try to match against a maximized version of the requested locale
+        let lc = lc.get_or_insert_with(LocaleExpander::new);
         if lc.maximize(&mut req) == TransformResult::Modified {
             test_strategy!(req, true, false);
         }

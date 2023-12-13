@@ -4,7 +4,7 @@ use criterion::Criterion;
 
 use fluent_langneg::convert_vec_str_to_langids_lossy;
 use fluent_langneg::negotiate_languages;
-use fluent_langneg::LangugeIdentifier;
+use fluent_langneg::LanguageIdentifier;
 
 #[no_mangle]
 #[inline(never)]
