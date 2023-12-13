@@ -4,6 +4,11 @@
 
   - …
 
+## fluent-langneg 0.14.0 (December 13, 2023)
+
+ - Move from using `unic-langid` to `icu-locid`.
+ - Re-export `LanguageIdentifier`.
+
 ## fluent-langneg 0.13.0 (May 6, 2020)
 
  - Update `unic-langid` to 0.9.
