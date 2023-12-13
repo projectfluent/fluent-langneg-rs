@@ -12,11 +12,11 @@ static REGION_MATCHING_KEYS: &[(Language, Region)] = &[
     (language!("es"), region!("ES")),
     (language!("fi"), region!("FI")),
     (language!("fr"), region!("FR")),
-    (language!("nu"), region!("NU")),
     (language!("it"), region!("IT")),
     (language!("lt"), region!("LT")),
     (language!("lv"), region!("LV")),
     (language!("nl"), region!("NL")),
+    (language!("nu"), region!("NU")),
     (language!("pl"), region!("PL")),
     (language!("ro"), region!("RO")),
     (language!("ru"), region!("RU")),
@@ -60,5 +60,23 @@ impl LocaleExpander {
         input.script = script;
         input.region = region;
         TransformResult::Modified
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_region_matching_sort() {
+        for v in REGION_MATCHING_KEYS.windows(2) {
+            let (v1, v2) = (v[0], v[1]);
+            assert!(
+                v1.0 < v2.0,
+                "Language \"{}\" is placed after \"{}\"",
+                v1.0,
+                v2.0
+            );
+        }
     }
 }

@@ -22,11 +22,11 @@ pub use accepted_languages::parse as parse_accepted_languages;
 pub use negotiate::negotiate_languages;
 pub use negotiate::NegotiationStrategy;
 
-use icu_locid::{LanguageIdentifier, ParserError};
+pub use icu_locid::{LanguageIdentifier, ParserError as LangugeIdentifierParserError};
 
 pub fn convert_vec_str_to_langids<'a, I, J>(
     input: I,
-) -> Result<Vec<LanguageIdentifier>, ParserError>
+) -> Result<Vec<LanguageIdentifier>, LangugeIdentifierParserError>
 where
     I: IntoIterator<Item = J>,
     J: AsRef<[u8]> + 'a,
