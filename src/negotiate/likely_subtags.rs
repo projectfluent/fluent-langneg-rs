@@ -1,4 +1,4 @@
-use unic_langid::LanguageIdentifier;
+use icu_locid::LanguageIdentifier;
 
 static REGION_MATCHING_KEYS: &[&str] = &[
     "az", "bg", "cs", "de", "es", "fi", "fr", "hu", "it", "lt", "lv", "nl", "pl", "ro", "ru",
@@ -22,7 +22,7 @@ impl MockLikelySubtags for LanguageIdentifier {
                 let lang = self.language;
 
                 for subtag in REGION_MATCHING_KEYS {
-                    if lang == *subtag {
+                    if lang.strict_cmp(subtag.as_bytes()).is_eq() {
                         self.region = Some(subtag.parse().unwrap());
                         return true;
                     }

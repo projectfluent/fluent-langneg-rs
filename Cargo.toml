@@ -7,11 +7,10 @@ version = "0.13.0"
 authors = ["Zibi Braniecki <gandalf@mozilla.com>"]
 homepage = "http://projectfluent.org/"
 license = "Apache-2.0"
-license-file = "LICENSE"
 repository = "https://github.com/projectfluent/fluent-langneg-rs"
 readme = "README.md"
 categories = ["internationalization", "localization"]
-edition = "2018"
+edition = "2021"
 include = [
 	"src/**/*",
 	"benches/*.rs",
@@ -26,13 +25,11 @@ coveralls = { repository = "projectfluent/fluent-langneg-rs", branch = "master",
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-unic-langid = "0.9"
+icu_locid = "1.4"
 
 [dev-dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-unic-langid = { version = "0.9", features = ["macros"] }
-unic-locale = { version = "0.9", features = ["macros"] }
 criterion = "0.3"
 
 [[bench]]
@@ -41,4 +38,3 @@ harness = false
 
 [features]
 default = []
-cldr = ["unic-langid/likelysubtags"]

@@ -14,7 +14,7 @@
 //! use fluent_langneg::negotiate_languages;
 //! use fluent_langneg::NegotiationStrategy;
 //! use fluent_langneg::convert_vec_str_to_langids_lossy;
-//! use unic_langid::LanguageIdentifier;
+//! use icu_locid::LanguageIdentifier;
 //!
 //! let requested = convert_vec_str_to_langids_lossy(&["pl", "fr", "en-US"]);
 //! let available = convert_vec_str_to_langids_lossy(&["it", "de", "fr", "en-GB", "en_US"]);
@@ -119,7 +119,7 @@
 //! ```
 //!
 
-use unic_langid::LanguageIdentifier;
+use icu_locid::LanguageIdentifier;
 
 #[cfg(not(feature = "cldr"))]
 mod likely_subtags;
@@ -131,6 +131,40 @@ pub enum NegotiationStrategy {
     Filtering,
     Matching,
     Lookup,
+}
+
+fn subtag_matches<P: PartialEq>(
+    subtag1: &Option<P>,
+    subtag2: &Option<P>,
+    as_range1: bool,
+    as_range2: bool,
+) -> bool {
+    (as_range1 && subtag1.is_none()) || (as_range2 && subtag2.is_none()) || subtag1 == subtag2
+}
+
+fn matches(
+    lid1: &LanguageIdentifier,
+    lid2: &LanguageIdentifier,
+    range1: bool,
+    range2: bool,
+) -> bool {
+    let language = (range1 && lid1.language.is_empty())
+        || (range2 && lid2.language.is_empty())
+        || lid1.language == lid2.language;
+    if !language {
+        return false;
+    }
+    let script = subtag_matches(&lid1.script, &lid2.script, range1, range2);
+    if !script {
+        return false;
+    }
+    let region = subtag_matches(&lid1.region, &lid2.region, range1, range2);
+    if !region {
+        return false;
+    }
+    (range1 && lid1.variants.is_empty())
+        || (range2 && lid2.variants.is_empty())
+        || lid1.variants == lid2.variants
 }
 
 pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<LanguageIdentifier>>(
@@ -152,10 +186,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
                         return true;
                     }
 
-                    if locale
-                        .as_ref()
-                        .matches(&req, $self_as_range, $other_as_range)
-                    {
+                    if matches(locale.as_ref(), &req, $self_as_range, $other_as_range) {
                         match_found = true;
                         supported_locales.push(*locale);
                         return false;
@@ -191,7 +222,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
         }
 
         // 4) Try to match against a variant as a range
-        req.clear_variants();
+        req.variants.clear();
         test_strategy!(true, true);
 
         // 5) Try to match against the likely subtag without region

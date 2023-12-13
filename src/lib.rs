@@ -22,18 +22,18 @@ pub use accepted_languages::parse as parse_accepted_languages;
 pub use negotiate::negotiate_languages;
 pub use negotiate::NegotiationStrategy;
 
-use unic_langid::{LanguageIdentifier, LanguageIdentifierError};
+use icu_locid::{LanguageIdentifier, ParserError};
 
 pub fn convert_vec_str_to_langids<'a, I, J>(
     input: I,
-) -> Result<Vec<LanguageIdentifier>, LanguageIdentifierError>
+) -> Result<Vec<LanguageIdentifier>, ParserError>
 where
     I: IntoIterator<Item = J>,
     J: AsRef<[u8]> + 'a,
 {
     input
         .into_iter()
-        .map(|s| LanguageIdentifier::from_bytes(s.as_ref()))
+        .map(|s| LanguageIdentifier::try_from_bytes(s.as_ref()))
         .collect()
 }
 
@@ -44,6 +44,6 @@ where
 {
     input
         .into_iter()
-        .filter_map(|t| LanguageIdentifier::from_bytes(t.as_ref()).ok())
+        .filter_map(|t| LanguageIdentifier::try_from_bytes(t.as_ref()).ok())
         .collect()
 }

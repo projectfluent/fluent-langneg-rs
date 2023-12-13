@@ -7,9 +7,7 @@ use fluent_langneg::convert_vec_str_to_langids_lossy;
 use fluent_langneg::negotiate_languages;
 use fluent_langneg::parse_accepted_languages;
 use fluent_langneg::NegotiationStrategy;
-use unic_langid::langid;
-use unic_langid::LanguageIdentifier;
-use unic_locale::locale;
+use icu_locid::{langid, locale, LanguageIdentifier, Locale};
 
 use serde::{Deserialize, Serialize};
 
@@ -190,7 +188,7 @@ fn locale_matching() {
     let loc_de_at = locale!("de-AT-u-hc-h24");
     let loc_en = locale!("en-u-ca-buddhist");
     let loc_de = locale!("de");
-    let loc_pl = locale!("pl-x-private");
+    let loc_pl: Locale = "pl-x-private".parse().unwrap();
 
     assert_eq!(
         negotiate_languages(

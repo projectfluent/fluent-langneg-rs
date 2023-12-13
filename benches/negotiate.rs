@@ -5,7 +5,7 @@ use criterion::Criterion;
 use fluent_langneg::convert_vec_str_to_langids_lossy;
 use fluent_langneg::negotiate_languages;
 
-use unic_langid::LanguageIdentifier;
+use icu_locid::LanguageIdentifier;
 
 #[no_mangle]
 #[inline(never)]
