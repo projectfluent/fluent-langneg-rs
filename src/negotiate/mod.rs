@@ -148,23 +148,14 @@ fn matches(
     range1: bool,
     range2: bool,
 ) -> bool {
-    let language = (range1 && lid1.language.is_empty())
+    ((range1 && lid1.language.is_empty())
         || (range2 && lid2.language.is_empty())
-        || lid1.language == lid2.language;
-    if !language {
-        return false;
-    }
-    let script = subtag_matches(&lid1.script, &lid2.script, range1, range2);
-    if !script {
-        return false;
-    }
-    let region = subtag_matches(&lid1.region, &lid2.region, range1, range2);
-    if !region {
-        return false;
-    }
-    (range1 && lid1.variants.is_empty())
-        || (range2 && lid2.variants.is_empty())
-        || lid1.variants == lid2.variants
+        || lid1.language == lid2.language)
+        && subtag_matches(&lid1.script, &lid2.script, range1, range2)
+        && subtag_matches(&lid1.region, &lid2.region, range1, range2)
+        && ((range1 && lid1.variants.is_empty())
+            || (range2 && lid2.variants.is_empty())
+            || lid1.variants == lid2.variants)
 }
 
 pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<LanguageIdentifier>>(
@@ -177,7 +168,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
     let mut available_locales: Vec<&A> = available.iter().collect();
 
     for req in requested {
-        let mut req = req.as_ref().to_owned();
+        let req = req.as_ref();
         macro_rules! test_strategy {
             ($self_as_range:expr, $other_as_range:expr) => {{
                 let mut match_found = false;
@@ -216,6 +207,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
             continue;
         }
 
+        let mut req = req.to_owned();
         // 3) Try to match against a maximized version of the requested locale
         if req.maximize() {
             test_strategy!(true, false);
