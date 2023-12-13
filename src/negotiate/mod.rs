@@ -144,7 +144,7 @@ fn subtag_matches<P: PartialEq>(
     (as_range1 && subtag1.is_none()) || (as_range2 && subtag2.is_none()) || subtag1 == subtag2
 }
 
-#[inline]
+#[inline(always)]
 fn matches(
     lid1: &LanguageIdentifier,
     lid2: &LanguageIdentifier,
