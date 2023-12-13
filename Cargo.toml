@@ -26,6 +26,7 @@ maintenance = { status = "actively-developed" }
 
 [dependencies]
 icu_locid = "1.4"
+icu_locid_transform = { version = "1.4", optional = true }
 
 [dev-dependencies]
 serde = { version = "1.0", features = ["derive"] }
@@ -38,3 +39,4 @@ harness = false
 
 [features]
 default = []
+cldr = ["icu_locid_transform"]

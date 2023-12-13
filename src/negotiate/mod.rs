@@ -123,8 +123,10 @@ use icu_locid::LanguageIdentifier;
 
 #[cfg(not(feature = "cldr"))]
 mod likely_subtags;
+#[cfg(feature = "cldr")]
+use icu_locid_transform::{LocaleExpander, TransformResult};
 #[cfg(not(feature = "cldr"))]
-use likely_subtags::MockLikelySubtags;
+use likely_subtags::{LocaleExpander, TransformResult};
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum NegotiationStrategy {
@@ -163,6 +165,8 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
     available: &'a [A],
     strategy: NegotiationStrategy,
 ) -> Vec<&'a A> {
+    let lc = LocaleExpander::new();
+
     let mut supported_locales = vec![];
 
     let mut available_locales: Vec<&A> = available.iter().collect();
@@ -210,7 +214,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 
         let mut req = req.to_owned();
         // 3) Try to match against a maximized version of the requested locale
-        if req.maximize() {
+        if lc.maximize(&mut req) == TransformResult::Modified {
             test_strategy!(req, true, false);
         }
 
@@ -220,7 +224,7 @@ pub fn filter_matches<'a, R: 'a + AsRef<LanguageIdentifier>, A: 'a + AsRef<Langu
 
         // 5) Try to match against the likely subtag without region
         req.region = None;
-        if req.maximize() {
+        if lc.maximize(&mut req) == TransformResult::Modified {
             test_strategy!(req, true, false);
         }
 

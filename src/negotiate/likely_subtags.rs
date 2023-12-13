@@ -22,13 +22,21 @@ static REGION_MATCHING_KEYS: &[(Language, Region)] = &[
     (language!("ru"), region!("RU")),
 ];
 
-pub trait MockLikelySubtags {
-    fn maximize(&mut self) -> bool;
+#[derive(PartialEq, Eq, Debug)]
+pub enum TransformResult {
+    Modified,
+    Unmodified,
 }
 
-impl MockLikelySubtags for LanguageIdentifier {
-    fn maximize(&mut self) -> bool {
-        let extended = match &self {
+pub struct LocaleExpander;
+
+impl LocaleExpander {
+    pub fn new() -> Self {
+        Self
+    }
+
+    pub fn maximize(&self, input: &mut LanguageIdentifier) -> TransformResult {
+        let extended = match &input {
             b if *b == &langid!("en") => langid!("en-Latn-US"),
             b if *b == &langid!("fr") => langid!("fr-Latn-FR"),
             b if *b == &langid!("sr") => langid!("sr-Cyrl-SR"),
@@ -37,20 +45,20 @@ impl MockLikelySubtags for LanguageIdentifier {
             b if *b == &langid!("zh-GB") => langid!("zh-Hant-GB"),
             b if *b == &langid!("zh-US") => langid!("zh-Hant-US"),
             _ => {
-                let lang = &self.language;
+                let lang = &input.language;
 
                 if let Ok(idx) = REGION_MATCHING_KEYS.binary_search_by(|(l, _)| l.cmp(lang)) {
                     let subtag = REGION_MATCHING_KEYS[idx].1;
-                    self.region = Some(subtag);
-                    return true;
+                    input.region = Some(subtag);
+                    return TransformResult::Modified;
                 }
-                return false;
+                return TransformResult::Unmodified;
             }
         };
         let (language, script, region) = (extended.language, extended.script, extended.region);
-        self.language = language;
-        self.script = script;
-        self.region = region;
-        true
+        input.language = language;
+        input.script = script;
+        input.region = region;
+        TransformResult::Modified
     }
 }
