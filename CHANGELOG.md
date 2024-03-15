@@ -4,6 +4,11 @@
 
   - …
 
+## fluent-langneg 0.14.1 (March 16, 2024)
+
+ - This is a 'safe harbor' release prior to bringing on non-Mozilla community maintainers.
+ - Minor optimizations for speed
+
 ## fluent-langneg 0.14.0 (December 13, 2023)
 
  - Move from using `unic-langid` to `icu-locid`.

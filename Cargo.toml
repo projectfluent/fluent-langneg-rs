@@ -3,8 +3,10 @@ name = "fluent-langneg"
 description = """
 A library for language and locale negotiation.
 """
-version = "0.14.0"
-authors = ["Zibi Braniecki <gandalf@mozilla.com>"]
+version = "0.14.1"
+authors = [
+	"Zibi Braniecki <zibi@unicode.org>"
+]
 homepage = "http://projectfluent.org/"
 license = "Apache-2.0"
 repository = "https://github.com/projectfluent/fluent-langneg-rs"
