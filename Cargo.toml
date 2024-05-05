@@ -33,7 +33,7 @@ icu_locid_transform = { version = "1.4", optional = true }
 [dev-dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-criterion = "0.3"
+criterion = "0.5"
 
 [[bench]]
 name = "negotiate"
