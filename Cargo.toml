@@ -6,7 +6,7 @@ A library for language and locale negotiation.
 version = "0.13.0"
 authors = ["Zibi Braniecki <gandalf@mozilla.com>"]
 homepage = "http://projectfluent.org/"
-license = "Apache-2.0"
+license = "Apache-2.0 OR MIT"
 repository = "https://github.com/projectfluent/fluent-langneg-rs"
 readme = "README.md"
 categories = ["internationalization", "localization"]
