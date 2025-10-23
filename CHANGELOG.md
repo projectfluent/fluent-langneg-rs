@@ -4,6 +4,11 @@
 
   - …
 
+## fluent-langneg 0.14.2 (October 23, 2025)
+
+ - Relicense with dual Apache 2.0 or MIT licensing, matches fluent-rs crates
+ - Bump dev-dependency on`criterion` to 0.7 reducing transitive dependencies
+
 ## fluent-langneg 0.14.1 (March 16, 2024)
 
  - This is a 'safe harbor' release prior to bringing on non-Mozilla community maintainers.
