@@ -4,6 +4,10 @@
 
   - …
 
+## fluent-langneg 0.13.1 (October 24, 2025)
+
+ - Backport dual Apache 2.0/MIT license change from 0.14.2 to 0.13.x releases
+
 ## fluent-langneg 0.13.0 (May 6, 2020)
 
  - Update `unic-langid` to 0.9.
